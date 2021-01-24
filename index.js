@@ -158,7 +158,7 @@ app.get('/verification', (req, res) => {
 //Generacion del Token JWT - Inciar sesión
 app.post('/logIn', (req, res) => {
     
-    var username = req.body.usuario;
+    var username = req.body.email;
     var password = req.body.password;
 
     var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 "; 
@@ -649,7 +649,7 @@ generateResultado = (source, title, url, image, description) => {
         url: "",
         image: "",
         description: ""
-}
+    }
     resultado.source = source;
     resultado.title = title;
     resultado.url = url;

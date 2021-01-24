@@ -4,3 +4,17 @@
 [2021-01-24T02:32:47.592Z] info Server listening in port 3000!
 [2021-01-24T02:33:21.251Z] info Server listening in port 3000!
 [2021-01-24T02:33:23.839Z] info Server listening in port 3000!
+[2021-01-24T03:12:08.641Z] info Server listening in port 3000!
+[2021-01-24T03:12:35.504Z] info Message sent: %s
+[2021-01-24T03:17:04.252Z] info Preview URL: %s
+[2021-01-24T03:17:04.252Z] info /registry (POST) Se le ha mandado un correo de verificación a kofsmorrizon@gmail.com
+[2021-01-24T03:17:04.275Z] info Message sent: %s
+[2021-01-24T03:17:04.275Z] info Preview URL: %s
+[2021-01-24T03:17:04.275Z] info /registry (POST) Se le ha mandado un correo de verificación a kofsmorrizon@gmail.com
+[2021-01-24T04:13:24.571Z] info Server listening in port 3000!
+[2021-01-24T04:14:18.002Z] info /logIn (POST) Se ingresó en la ruta con una entidad no procesable
+[2021-01-24T04:14:25.688Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-24T04:14:39.523Z] info Message sent: %s
+[2021-01-24T04:14:39.523Z] info Preview URL: %s
+[2021-01-24T04:14:39.523Z] info /registry (POST) Se le ha mandado un correo de verificación a mauriciorodricar@hotmail.com
+[2021-01-24T04:14:54.276Z] info /verification (GET) Se ingresó el código8f27c366e7cc32f55e2560c860fdf35cbb5019a39834694c054740f2c74a3c1b627bc435b0a1aef314f63c2d980b31ec23e4d0439713d4a494af1861faba3002 para activar una cuenta.
