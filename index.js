@@ -247,11 +247,45 @@ app.post('/logIn', (req, res) => {
         logger.info('/logIn (POST) Se ingresó en la ruta con una entidad no procesable');
         return res.status(400).send({           
             lError: true,
-            cError: "Los parámetros [usuario] y [password] son obligatorios",
+            cError: "Los parámetros [email] y [password] son obligatorios",
             cToken: ""
         }); 
     }//fin:else
 });//post()
+
+//-----------------------------------------------------------------------------
+
+//Cerrar la sesión y el Token JWT
+app.post('/logOut', (req, res) => {
+    var token = req.body.ctoken;
+    var email = req.body.email;
+    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and cusuario  = "' + email + '" LIMIT 1'; 
+    dbConn.query(sQueryDelete, (err, results, fields) => {
+        if (err) {
+            logger.info('/logOut (POST) ' + err.message);
+            throw err;
+        }
+        if (results['affectedRows'] > 0) {
+            logger.info('/logOut (POST) Se ha cerrado la sesión del usuario ' + email + ".");
+            return res.status(200).send(
+                {           
+                    lError: false,
+                    cError: "Se cerró la sesión correctamente.",
+                    cToken: ""
+                }
+            );
+        } else {
+            logger.info('/logOut (POST) Se intentó cerrar una sesión cerrada de ' + email + ".");
+            return res.status(200).send(
+                {           
+                    lError: false,
+                    cError: "",
+                    cToken: ""
+                }
+            );
+        }
+    });
+});
 
 //-----------------------------------------------------------------------------
 
@@ -625,9 +659,9 @@ app.listen(
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
-        crawlServices();
-        cron.schedule('* * */4 * *', () => {
-            crawlServices();
-        });
+        // crawlServices();
+        // cron.schedule('* * */4 * *', () => {
+        //     crawlServices();
+        // });
     }
 );

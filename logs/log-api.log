@@ -72,3 +72,15 @@
 [2021-01-24T19:58:30.471Z] info Server listening in port 3000!
 [2021-01-24T19:59:12.589Z] info Server listening in port 3000!
 [2021-01-24T20:12:46.372Z] info Server listening in port 3000!
+[2021-01-24T21:05:29.868Z] info Server listening in port 3000!
+[2021-01-24T21:07:41.914Z] info Server listening in port 3000!
+[2021-01-24T21:08:57.439Z] info /logOut (POST) ER_PARSE_ERROR: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '@gmail.com" LIMIT 1' at line 1
+[2021-01-24T21:09:05.677Z] info Server listening in port 3000!
+[2021-01-24T21:09:22.176Z] info Server listening in port 3000!
+[2021-01-24T21:09:26.132Z] info /logOut (POST) Se ha cerrado la sesión del usuario kofsmorrizon@gmail.com.
+[2021-01-24T21:10:11.849Z] info Server listening in port 3000!
+[2021-01-24T21:10:13.240Z] info /logOut (POST) Se ha cerrado la sesión del usuario kofsmorrizon@gmail.com.
+[2021-01-24T21:10:43.344Z] info Server listening in port 3000!
+[2021-01-24T21:10:46.249Z] info /logOut (POST) Se ha cerrado la sesión del usuario kofsmorrizon@gmail.com.
+[2021-01-24T21:12:32.598Z] info Server listening in port 3000!
+[2021-01-24T21:12:33.784Z] info /logOut (POST) Se intentó cerrar una sesión cerrada de kofsmorrizon@gmail.com.
