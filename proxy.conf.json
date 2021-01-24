@@ -1,0 +1,7 @@
+{
+    "/xml-to-json/*": {
+        "target": "https://api.factmaven.com",
+        "secure": false,
+        "changeOrigin": true
+    }
+}
