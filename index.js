@@ -6,6 +6,8 @@ const crypto     = require('sha3');
 const config     = require('./configs/config');
 const nodemailer = require("nodemailer");
 const logger     = require('./utils/logger');
+const axios      = require('axios');
+var cron = require('node-cron');
 
 const port = 3000;
 
@@ -478,10 +480,10 @@ app.post('/postComment', (req, res) => {
 
 //-----------------------------------------------------------------------------
 
-function crawlServices(urls) {
-    urlImgNotFound = "https://uploads-ssl.webflow.com/5d6ed3ec5fd0246da423f7a8/5dcc3ae6e62de1121a4aab86_no-disponible-7448e295ce0d80db8b02f2e8e09c6148ecbd626418792e792d0195e8c26851b9.png";
-    urlImgNotFoundAnmo = "https://www.anmosugoi.com/wp-content/uploads/2019/10/sugoi-perfil-octubre.jpg";
-    Curls = {
+function crawlServices() {
+    const urlImgNotFound = "https://uploads-ssl.webflow.com/5d6ed3ec5fd0246da423f7a8/5dcc3ae6e62de1121a4aab86_no-disponible-7448e295ce0d80db8b02f2e8e09c6148ecbd626418792e792d0195e8c26851b9.png";
+    const urlImgNotFoundAnmo = "https://www.anmosugoi.com/wp-content/uploads/2019/10/sugoi-perfil-octubre.jpg";
+    const Curls = {
         bbc: {
             url: "https://www.bbc.com/mundo/ultimas_noticias/index.xml"
         },
@@ -502,164 +504,114 @@ function crawlServices(urls) {
         }
     }
 
-    let listaResultados = [];
-    let listaBbc = [];
-    let listaReforma =  [];
-    let listaKudasai = [];
-    let listaAnmo = [];
-    let listaMusica = [];
-    let listaDeportes = [];
-    let numFeeds = [];
-
-    for (let index = 0; index < urls.length; index++) {
-        const httpOptions = {
-          headers: new HttpHeaders({ 
-            'Access-Control-Allow-Origin':'http://localhost:4200/', 'Content-Type': 'application/json'
-          })
-        };
-        let urlName = urls[index];
-        let url = Curls[urlName]["url"];
-        let http = new HttpClient();
-        http.get('/xml-to-json/?xml=' + url, httpOptions) //arreglar usando proxy (?)
-        .toPromise()
-        .then( (response) => {
-          let resultado = {}
-          let respuesta = [];
-          switch (urlName) {
-            case "bbc":
-              respuesta = response["feed"].entry;
-              numFeeds.push((respuesta).length);
-              for (let aux = 0; aux < (respuesta).length; aux++) {
-                let image = urlImgNotFound;
-                try {
-                  image = respuesta[aux].link['media:content']['media:thumbnail'][0]['@url'];
-                } catch (error) {
-                  image = urlImgNotFound;
+    for (let index = 2; index < 3/*Object.keys(Curls).length*/; index++) {
+        let urlName = Object.keys(Curls)[index];
+        let url = Curls[urlName]['url'];
+        axios.get('https://api.factmaven.com/xml-to-json/?xml=' + url)
+        .then(function (response) {
+            let resultado = {}
+            let respuesta = [];
+            switch (urlName) {
+                case "bbc":
+                respuesta = response['data']["feed"]['entry'];
+                for (let aux = (respuesta).length-1; aux >= 0; aux--) {
+                    let image = urlImgNotFound;
+                    try {
+                        image = respuesta[aux]['link']['content']['thumbnail'][0]['url'];
+                    } catch (error) {
+                        image = urlImgNotFound;
+                    }
+                    if (image == undefined) {
+                        image = urlImgNotFound;
+                    }
+                    resultado = generateResultado("bbc", respuesta[aux].title, respuesta[aux]['link']['href'], image , respuesta[aux].summary);
                 }
-                if (image == undefined) {
-                  image = urlImgNotFound;
+                break;
+                case "reforma":
+                respuesta = response['data']["rss"]['channel']['item'];
+                for (let aux = 0; aux < (respuesta).length; aux++) {
+                    resultado = generateResultado("reforma", respuesta[aux].title, respuesta[aux]['link'], respuesta[aux].enclosure, respuesta[aux].description);
                 }
-                resultado = generateResultado("bbc", respuesta[aux].title, respuesta[aux].link['@href'], image , respuesta[aux].summary);
-                listaBbc.push(resultado);
-              }
-              break;
-            case "reforma":
-              respuesta = response["rss"].channel.item;
-              numFeeds.push((respuesta).length);
-              for (let aux = 0; aux < (respuesta).length; aux++) {
-                resultado = generateResultado("reforma", respuesta[aux].title, respuesta[aux].link, respuesta[aux].enclosure, respuesta[aux].description);
-                listaReforma.push(resultado);
-              }
-            break;
-            case "kudasai":
-              respuesta = response["rss"].channel.item;
-              numFeeds.push((respuesta).length);
-              for (let aux = 0; aux < (respuesta).length; aux++) {
-                let content = respuesta[aux]['content:encoded'];
-                let imagen = urlImgNotFound;
-                let divisor = content.split('<img loading="');
-                if (divisor[1]) {
-                  divisor = divisor[1].split('src="');
-                  if (divisor[1]) {
-                    divisor = divisor[1].split('" ');
-                  }
-                  imagen = eliminarHtml(divisor[0]);
+                break;
+                case "kudasai":
+                respuesta = response['data']["rss"]['channel']['item'];
+                for (let aux = (respuesta).length-1; aux >= 0; aux--) {
+                    let content = respuesta[aux]['encoded'];
+                    let imagen = urlImgNotFound;
+                    let divisor = content.split('<img loading="');
+                    if (divisor[1]) {
+                    divisor = divisor[1].split('src="');
+                    if (divisor[1]) {
+                        divisor = divisor[1].split('" ');
+                    }
+                    imagen = eliminarHtml(divisor[0]);
+                    }
+                    resultado = generateResultado("somoskudasai", respuesta[aux].title, respuesta[aux].link, imagen, respuesta[aux].description);
                 }
-                resultado = generateResultado("somoskudasai", respuesta[aux].title, respuesta[aux].link, imagen, respuesta[aux].description);
-                listaKudasai.push(resultado);
-              }
-              break;
-            case "anmo":
-              respuesta = response["rss"].channel.item;
-              numFeeds.push((respuesta).length);
-              for (let aux = 0; aux < (respuesta).length; aux++) {
-                resultado = generateResultado("anmosugoi", respuesta[aux].title, respuesta[aux].link, urlImgNotFoundAnmo, respuesta[aux].description);
-                listaAnmo.push(resultado);
-              }
-              break;
-            case "musica":
-              respuesta = response["rss"].channel.item;
-              numFeeds.push((respuesta).length);
-              for (let aux = 0; aux < (respuesta).length; aux++) {
-                let description = respuesta[aux].description;
-                let divisor = description.split('<img align=\"left\" src=\"');
-                divisor = divisor[1].split('\"/>\n');
-                let imagen = eliminarHtml(divisor[0]);
-                description = String(divisor[1]).trim();
-                resultado = generateResultado("hoy.es", respuesta[aux].title, respuesta[aux].link, imagen, description);
-                listaMusica.push(resultado);
-              }
-              break;
-            case "deportes":
-              respuesta = response["rss"].channel.item;
-              numFeeds.push((respuesta).length);
-              for (let aux = 0; aux < (respuesta).length; aux++) {
-                let image = respuesta[aux].image;
-                if (image == undefined) {
-                  image = urlImgNotFound;
+                break;
+                case "anmo":
+                respuesta = response['data']["rss"]['channel']['item'];
+                for (let aux = (respuesta).length-1; aux >= 0; aux--) {
+                    resultado = generateResultado("anmosugoi", respuesta[aux].title, respuesta[aux].link, urlImgNotFoundAnmo, respuesta[aux].description);
                 }
-                resultado = generateResultado("espn", respuesta[aux].title, respuesta[aux].link, image, respuesta[aux].description);
-                listaDeportes.push(resultado);
-              }
-              break;
-            default:
-              break;
-          }
-          sleep(1000);
-          if (index == (urls.length - 1)) {
-            let numItems = Math.max(listaAnmo.length, listaBbc.length, listaDeportes.length, listaKudasai.length, listaMusica.length, listaReforma.length);
-        
-            for (let contador = 0; contador < numItems; contador++) {
-              if (listaBbc[contador]) {
-                listaResultados.push(listaBbc[contador])
-              }
-              if (listaAnmo[contador]) {
-                listaResultados.push(listaAnmo[contador])
-              }
-              if (listaDeportes[contador]) {
-                listaResultados.push(listaDeportes[contador])
-              }
-              if (listaKudasai[contador]) {
-                listaResultados.push(listaKudasai[contador])
-              }
-              if (listaMusica[contador]) {
-                listaResultados.push(listaMusica[contador])
-              }
-              if (listaReforma[contador]) {
-                listaResultados.push(listaReforma[contador])
-              }
+                break;
+                case "musica":
+                respuesta = response['data']["rss"]['channel']['item'];
+                for (let aux = (respuesta).length-1; aux >= 0; aux--) {
+                    let description = respuesta[aux].description;
+                    let divisor = description.split('<img align=\"left\" src=\"');
+                    divisor = divisor[1].split('\"/>\n');
+                    let imagen = eliminarHtml(divisor[0]);
+                    description = String(divisor[1]).trim();
+                    resultado = generateResultado("hoy.es", respuesta[aux].title, respuesta[aux].link, imagen, description);
+                }
+                break;
+                case "deportes":
+                respuesta = response['data']["rss"]['channel']['item'];
+                for (let aux = (respuesta).length-1; aux >= 0; aux--) { 
+                    let image = respuesta[aux].image;
+                    if (image == undefined) {
+                    image = urlImgNotFound;
+                    }
+                    resultado = generateResultado("espn", respuesta[aux].title, respuesta[aux].link, image, respuesta[aux].description);
+                }
+                break;
+                default:
+                break;
             }
-            return listaResultados;
-          }
-        }, (error) => {
-          reject(error);
-    });
-}
-}
-
-aleatorizarResultados = (arr1) => {
-    arr1.sort(function() { return Math.random() - 0.5 });
-    return arr1;
-}
-
-generateResultado = (source, title, url, image, description) => {
-    let resultado = {
-        source: "",
-        title: "",
-        url: "",
-        image: "",
-        description: ""
+            sleep(1000);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
     }
-    resultado.source = source;
-    resultado.title = title;
-    resultado.url = url;
-    resultado.image = image;
-    resultado.description = eliminarHtml(description);
-    return resultado;
 }
 
-sleep = (ms) => {
+var sleep = (ms) => {
     return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
+var generateResultado = (source, title, url, image, description) => {
+    let sQuerySelect = "select name from publicacion where url = '" + url +"'";
+    dbConn.query(
+        sQuerySelect, 
+        function (error, results, fields) {
+            if (results.length < 0) {
+                let sQueryInsert = 'INSERT INTO publicacion (source, url, name, img, desc)';
+                sQueryInsert += 'VALUES(?, ?, ?, ?, ?)';
+                let aDataInsert = [source, title, url, image, description];
+                console.log(aDataInsert);
+                dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
+                    if (err) {
+                        logger.info(err.message);
+                        throw err;
+                    } else {
+                        logger.info("/generateResultado se añadieron publicaciones a la base de datos.");
+                    }
+                });
+            }
+        }
+    );
 }
 
 function eliminarHtml(cadena) {
@@ -673,5 +625,9 @@ app.listen(
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
+        crawlServices();
+        cron.schedule('* * */4 * *', () => {
+            crawlServices();
+        });
     }
 );
