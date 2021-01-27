@@ -21,17 +21,10 @@ app.use(bodyParser.json({limit:'10mb'}));
 app.use(expressSanitizer());
 
 app.set('secret_key', config.CLAVE_SECRETA);
-
 //-----------------------------------------------------------------------------
 
 // connection configurations
-var dbConn = mysql.createConnection({
-    host: config,
-    port:3306,
-    user: 'root',
-    password: 'admin',
-    database: 'seguridad'
-});
+var dbConn = mysql.createConnection(config.configdb);
 // connect to database
 dbConn.connect();
 //Home
@@ -47,7 +40,7 @@ app.post('/api/v1/singIn', (req, res) => {
     var Acode = "";
     if((email != null && email != undefined) && (password != null && password != undefined)){
         dbConn.query(
-            sQuerySelect, 
+            sQuerySelect,
             function (error, results, fields) {
                 if(error){
                     logger.error(error.message);
@@ -70,7 +63,7 @@ app.post('/api/v1/singIn', (req, res) => {
                                 sendVerificationCode(email, urlVerification);
                                 logger.info("/registry (POST) Se le ha mandado un correo de verificación a " + email);
                                 return res.status(200).send(
-                                    {           
+                                    {
                                         lError: false,
                                         cError: "Se le ha mandado un correo de verificación a " + email,
                                         cToken: ""
@@ -82,7 +75,7 @@ app.post('/api/v1/singIn', (req, res) => {
                         if ((results.length == 1) && (results[0].lactivo == 0)) {
                             logger.info("/registry (POST) El usuario intentó registrarse con el email " + email +" pero se había mandado un correo de verificación con anterioridad.")
                             return res.status(200).send(
-                                {           
+                                {
                                     lError: false,
                                     cError: "Se le ha mandado un correo de verificación a " + email +" con anterioridad.",
                                     cToken: ""
@@ -91,7 +84,7 @@ app.post('/api/v1/singIn', (req, res) => {
                         } else {
                             logger.info("/registry (POST) El usuario intentó registrarse con el email: " + email);
                             return res.status(200).send(
-                                {           
+                                {
                                     lError: false,
                                     cError: "El email " + email + " ya se encuentra en uso.",
                                     cToken: ""
@@ -105,7 +98,7 @@ app.post('/api/v1/singIn', (req, res) => {
     } else {
         logger.info('/registry (POST) Se ingresó en la ruta con una entidad no procesable');
         return res.status(422).send(
-            {           
+            {
                 lError: true,
                 cError: "Unprocessable Entity",
                 cToken: ""
@@ -126,7 +119,7 @@ app.get('/userVerification', (req, res) => {
             if (results.affectedRows < 1) {
                 logger.info('/verification (GET) Se ingresó un código inválido para activar una cuenta.');
                 return res.status(200).send(
-                    {           
+                    {
                         lError: true,
                         cError: "Invalid Code",
                         cToken: ""
@@ -136,7 +129,7 @@ app.get('/userVerification', (req, res) => {
                 logger.info('/verification (GET) Se ingresó el código' + key +' para activar una cuenta.');
                 console.log(results);
                 return res.status(200).send(
-                    {           
+                    {
                         lError: true,
                         cError: "Activation completed. Now you can log in.",
                         cToken: ""
@@ -147,7 +140,7 @@ app.get('/userVerification', (req, res) => {
     } else {
         logger.info('/verification (GET) Se intentó acceder en la ruta sin ingresar el parámetro key');
         return res.status(422).send(
-            {           
+            {
                 lError: true,
                 cError: "Unprocessable Entity",
                 cToken: ""
@@ -161,11 +154,11 @@ app.get('/userVerification', (req, res) => {
 
 //Generacion del Token JWT - Inciar sesión
 app.post('/api/v1/logIn', (req, res) => {
-    
+
     var username = req.sanitize(req.body.email);
     var password = req.sanitize(req.body.password);
 
-    var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 "; 
+    var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 ";
     var Sha3Pass = "";
     var sQueryInsert  = 'INSERT INTO tokens_jwt(ctoken, iid_usuario, cusuario, dtfecha_expira, lactivo) ';
         sQueryInsert += " VALUES(?, ?, ?, ?, ? )";
@@ -178,14 +171,14 @@ app.post('/api/v1/logIn', (req, res) => {
     if((username != null && username != undefined) && (password != null && password != undefined)){
         sQuerySelect += " and cusuario = '" + username + "'";
         dbConn.query(
-            sQuerySelect, 
+            sQuerySelect,
             function (error, results, fields) {
                 if(error){
                     logger.info('/logIn (POST) ' + error.message);
                     throw error;
                 }//fin:if
                 else{
-                    Sha3Pass = new crypto.SHA3(512).update(password).digest('hex'); 
+                    Sha3Pass = new crypto.SHA3(512).update(password).digest('hex');
                     console.log(Sha3Pass);
                     if(results.length > 0){
                         if(Sha3Pass == results[0].cpassword){
@@ -193,7 +186,7 @@ app.post('/api/v1/logIn', (req, res) => {
                             tokenData = {
                                 usuario: results[0].cusuario
                             }
-                        
+
                             let dtExpire = new Date();
                             dtExpire.setSeconds(dtExpire.getSeconds() + config.EXPIRE_TOKEN);
                             dtExpireToken = config.EXPIRE_TOKEN;
@@ -203,7 +196,7 @@ app.post('/api/v1/logIn', (req, res) => {
                                 }
                             );
 
-                            let aDataInsert = 
+                            let aDataInsert =
                                 [token,results[0].iid, results[0].cusuario, dtExpire, 1];
 
                             dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
@@ -223,35 +216,35 @@ app.post('/api/v1/logIn', (req, res) => {
                         else{
                             logger.info('/logIn (POST) Se ingresó un password incorrecto desde (poner aquí la IP).');
                             return res.status(200).send(
-                                {           
+                                {
                                     lError: true,
                                     cError: "El password es incorrecto",
                                     cToken: ""
                                 }
-                            ); 
-                        }//fin:else  
+                            );
+                        }//fin:else
                     }//fin:if
                     else{
                         logger.info('/logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.');
                         return res.status(200).send(
-                            {           
+                            {
                                 lError: true,
                                 cError: "El usuario no se encuentra registrado.",
                                 cToken: ""
                             }
-                        );            
-                    }//fin:else                                
+                        );
+                    }//fin:else
                 }//fin:else
             }
         );
     }//fin:else
     else{
         logger.info('/logIn (POST) Se ingresó en la ruta con una entidad no procesable');
-        return res.status(400).send({           
+        return res.status(400).send({
             lError: true,
             cError: "Los parámetros [email] y [password] son obligatorios",
             cToken: ""
-        }); 
+        });
     }//fin:else
 });//post()
 
@@ -261,7 +254,7 @@ app.post('/api/v1/logIn', (req, res) => {
 app.post('/logOut', (req, res) => {
     var token = req.body.ctoken;
     var email = req.body.email;
-    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and cusuario  = "' + email + '" LIMIT 1'; 
+    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and cusuario  = "' + email + '" LIMIT 1';
     dbConn.query(sQueryDelete, (err, results, fields) => {
         if (err) {
             logger.info('/logOut (POST) ' + err.message);
@@ -270,7 +263,7 @@ app.post('/logOut', (req, res) => {
         if (results['affectedRows'] > 0) {
             logger.info('/logOut (POST) Se ha cerrado la sesión del usuario ' + email + ".");
             return res.status(200).send(
-                {           
+                {
                     lError: false,
                     cError: "Se cerró la sesión correctamente.",
                     cToken: ""
@@ -279,7 +272,7 @@ app.post('/logOut', (req, res) => {
         } else {
             logger.info('/logOut (POST) Se intentó cerrar una sesión cerrada de ' + email + ".");
             return res.status(200).send(
-                {           
+                {
                     lError: false,
                     cError: "",
                     cToken: ""
@@ -307,7 +300,7 @@ function tokenIsActive(token) {
             if (err) {
                 logger.info(err.message);
                 return false;
-            }//fin:else 
+            }//fin:else
             else {
                 return true;
             }//fin:else
@@ -316,28 +309,28 @@ function tokenIsActive(token) {
     catch (ex) {
         logger.info(ex.message);
         return false;
-    }   
+    }
 };//fin:get()
 
 //-----------------------------------------------------------------------------
 
 //Ejemplo de creacion de middleware para procesar la peticiones antes de invocar los servicios
 protectedRoute.use((req, res, next) => {
-    
+
     const sToken = req.headers['token'];
 
     if (sToken) {
-        jwt.verify(sToken, app.get('secret_key'), (err, decoded) => {      
+        jwt.verify(sToken, app.get('secret_key'), (err, decoded) => {
             if (err) {
                 return res.json(
-                    { 
+                    {
                         lError: true,
-                        cError: "El token es invalido." 
+                        cError: "El token es invalido."
                     }
-                );    
-            } 
+                );
+            }
             else {
-                req.decoded = decoded;    
+                req.decoded = decoded;
                 next();
             }
         });
@@ -355,11 +348,11 @@ protectedRoute.use((req, res, next) => {
 //-----------------------------------------------------------------------------
 
 app.get('/api/datos', isAuthorized, (req, res) => {
-    
+
     return res.json(
-        { 
-            lError: false, 
-            cError:"", 
+        {
+            lError: false,
+            cError:"",
             cMensaje:"Sucess"
         }
     );
@@ -372,23 +365,23 @@ function isAuthorized(req, res, next) {
     console.log(req.headers['token']);
 
     if (req.headers['token'] !== undefined && req.headers['token'] !== null) {
-        
+
         let sToken = req.headers['token'];
-        
-        //let privateKey = fs.readFileSync('./private.pem', 'utf8');        
+
+        //let privateKey = fs.readFileSync('./private.pem', 'utf8');
         jwt.verify(sToken, app.get("secret_key"), { algorithm: "HS256" }, (err, user) => {
-            if (err) {                  
+            if (err) {
                 return res.status(401).json(
-                    {                        
-                        lError: true, 
+                    {
+                        lError: true,
                         cError:"El token de seguridad ya expiró."
                     }
                 );
-            }//fin:if (err)     
+            }//fin:if (err)
             return next();
         })
-    }//fin:if (typeof req.headers['token'] !== undefined && req.headers['token'] == null) 
-    else {        
+    }//fin:if (typeof req.headers['token'] !== undefined && req.headers['token'] == null)
+    else {
         //res.status(500).json({ error: "Not Authorized" });
         return res.status(400).json(
             {
@@ -406,7 +399,7 @@ app.post('/api/demo', (req, res) => {
     var username = req.body.usuario;
     //var password = req.body.password;
 
-    if((username != null && username != undefined) 
+    if((username != null && username != undefined)
         //&& (password != null && password != undefined)
     ){
         getInformacionUsuario(username).then(function(oData) {
@@ -414,19 +407,19 @@ app.post('/api/demo', (req, res) => {
 
             return res.json(oData);
 
-        }).catch((err) => 
-            setImmediate(() => { 
-                throw err; 
+        }).catch((err) =>
+            setImmediate(() => {
+                throw err;
             })
-        );    
+        );
     }//fin:if
     else{
-        return res.status(400).send({           
+        return res.status(400).send({
             lError: true,
             cError: "Los parámetros [usuario] y [password] son obligatorios",
             cToken: ""
         });
-    }//fin:else    
+    }//fin:else
 });//fin:get
 
 //-----------------------------------------------------------------------------
@@ -436,12 +429,12 @@ function getInformacionUsuario(_usuario){
     return new Promise(function(resolve, reject) {
 
         var oReturn = { "lError": "false", "cError": "", "iid" : 0, "cpassword": ""}
-        var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 and cusuario = ?"; 
+        var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 and cusuario = ?";
         var Sha3Pass = "";
 
         var query_params = [_usuario];
 
-        dbConn.query(sQuerySelect, query_params, function (err, rows, fields) {    
+        dbConn.query(sQuerySelect, query_params, function (err, rows, fields) {
             if (err) {
                 return reject(err);
             }//fin:if
@@ -473,7 +466,7 @@ async function sendVerificationCode(email, url) {
         pass: 'ZNJYh8Cp7tp85jkzhB', // generated ethereal password
       },
     });
-  
+
     // send mail with defined transport object
     let info = {
       from: '"MenteRizoma👻" <noReply@menteRizoma.com>', // sender address
@@ -484,13 +477,13 @@ async function sendVerificationCode(email, url) {
 
     transporter.sendMail(info, (error, info) => {
         if (error) {
-            return res.status(500).send({           
+            return res.status(500).send({
                 lError: true,
                 cError: error.message,
                 cToken: ""
             });
         } else {
-            return res.status(200).send({           
+            return res.status(200).send({
                 lError: true,
                 cError: "Email enviado",
                 cToken: ""
@@ -604,7 +597,7 @@ function crawlServices() {
                 break;
                 case "deportes":
                 respuesta = response['data']["rss"]['channel']['item'];
-                for (let aux = (respuesta).length-1; aux >= 0; aux--) { 
+                for (let aux = (respuesta).length-1; aux >= 0; aux--) {
                     let image = respuesta[aux].image;
                     if (image == undefined) {
                     image = urlImgNotFound;
@@ -630,7 +623,7 @@ var sleep = (ms) => {
 var generateResultado = (source, title, url, image, description) => {
     let sQuerySelect = "select name from publicacion where url = '" + url +"'";
     dbConn.query(
-        sQuerySelect, 
+        sQuerySelect,
         function (error, results, fields) {
             if (results.length < 0) {
                 let sQueryInsert = 'INSERT INTO publicacion (source, url, name, img, desc)';
@@ -657,7 +650,7 @@ function eliminarHtml(cadena) {
 //-----------------------------------------------------------------------------
 
 app.listen(
-    port, 
+    port,
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
