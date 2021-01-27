@@ -16,6 +16,8 @@ const app = express();
 
 const protectedRoute = express.Router();
 
+const apiUrlBase = "/api/v1";
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({limit:'10mb'}));
 app.use(expressSanitizer());
@@ -40,7 +42,7 @@ app.get('/', (req, res) => res.send('Running node!'));
 //-----------------------------------------------------------------------------
 
 //Registro
-app.post('/api/v1/singIn', (req, res) => {
+app.post('/api/v1/signIn', (req, res) => {
     var email = req.sanitize(req.body.email);
     var password = req.sanitize(req.body.password);
     var sQuerySelect = "select iid from usuario where cusuario = '" + email +"'";
@@ -66,7 +68,7 @@ app.post('/api/v1/singIn', (req, res) => {
                                 logger.info(err.message);
                                 throw err;
                             } else {
-                                urlVerification = config.URL_BASE + "/verification?key=" + ShaAcode;
+                                urlVerification = config.URL_BASE + apiUrlBase + "/userVerification?key=" + ShaAcode;
                                 sendVerificationCode(email, urlVerification);
                                 logger.info("/registry (POST) Se le ha mandado un correo de verificación a " + email);
                                 return res.status(200).send(
@@ -117,7 +119,7 @@ app.post('/api/v1/singIn', (req, res) => {
 //-----------------------------------------------------------------------------
 
 //Verificar usuario
-app.get('/userVerification', (req, res) => {
+app.get('/api/v1/userVerification', (req, res) => {
     var key = req.sanitize(req.query.key);
 
     if(key != null && key != undefined){
@@ -620,9 +622,13 @@ function crawlServices() {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 var sleep = (ms) => {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
+
+//-----------------------------------------------------------------------------
 
 var generateResultado = (source, title, url, image, description) => {
     if (url != null && url != undefined && url != "") {
@@ -648,9 +654,16 @@ var generateResultado = (source, title, url, image, description) => {
     }
 }
 
+//-----------------------------------------------------------------------------
+
 function eliminarHtml(cadena) {
     return cadena.replace(/<\/?[^>]+>/gi, '');
 }
+
+//-----------------------------------------------------------------------------
+
+//QR CODE
+//https://chart.googleapis.com/chart?cht=qr&chl=https://www.qrcode-monkey.com/qr-code-api-with-logo&chs=200x200
 
 //-----------------------------------------------------------------------------
 
