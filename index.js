@@ -7,7 +7,8 @@ const config     = require('./configs/config');
 const nodemailer = require("nodemailer");
 const logger     = require('./utils/logger');
 const axios      = require('axios');
-var cron = require('node-cron');
+const cron = require('node-cron');
+const expressSanitizer = require('express-sanitizer');
 
 const port = 3000;
 
@@ -17,6 +18,7 @@ const protectedRoute = express.Router();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({limit:'10mb'}));
+app.use(expressSanitizer());
 
 app.set('secret_key', config.CLAVE_SECRETA);
 
@@ -38,9 +40,9 @@ app.get('/', (req, res) => res.send('Running node!'));
 //-----------------------------------------------------------------------------
 
 //Registro
-app.post('/registry', (req, res) => {
-    var email = req.body.email;
-    var password = req.body.password;
+app.post('/api/v1/singIn', (req, res) => {
+    var email = req.sanitize(req.body.email);
+    var password = req.sanitize(req.body.password);
     var sQuerySelect = "select iid from usuario where cusuario = '" + email +"'";
     var Acode = "";
     if((email != null && email != undefined) && (password != null && password != undefined)){
@@ -115,7 +117,7 @@ app.post('/registry', (req, res) => {
 //-----------------------------------------------------------------------------
 
 //Verificar usuario
-app.get('/verification', (req, res) => {
+app.get('/userVerification', (req, res) => {
     var key = req.query.key;
 
     if(key != null && key != undefined){
@@ -158,10 +160,10 @@ app.get('/verification', (req, res) => {
 //-----------------------------------------------------------------------------
 
 //Generacion del Token JWT - Inciar sesión
-app.post('/logIn', (req, res) => {
+app.post('/api/v1/logIn', (req, res) => {
     
-    var username = req.body.email;
-    var password = req.body.password;
+    var username = req.sanitize(req.body.email);
+    var password = req.sanitize(req.body.password);
 
     var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 "; 
     var Sha3Pass = "";
@@ -501,7 +503,7 @@ async function sendVerificationCode(email, url) {
 
 //-----------------------------------------------------------------------------
 
-app.post('/postComment', (req, res) => {
+app.post('/comment', (req, res) => {
 
     token = req.body.cToken;
     if(cToken != null && cToken != undefined){
@@ -538,7 +540,7 @@ function crawlServices() {
         }
     }
 
-    for (let index = 2; index < 3/*Object.keys(Curls).length*/; index++) {
+    for (let index = 2; index < Object.keys(Curls).length; index++) {
         let urlName = Object.keys(Curls)[index];
         let url = Curls[urlName]['url'];
         axios.get('https://api.factmaven.com/xml-to-json/?xml=' + url)
@@ -659,6 +661,7 @@ app.listen(
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
+        crawlServices();
         // crawlServices();
         // cron.schedule('* * */4 * *', () => {
         //     crawlServices();

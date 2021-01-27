@@ -84,3 +84,18 @@
 [2021-01-24T21:10:46.249Z] info /logOut (POST) Se ha cerrado la sesión del usuario kofsmorrizon@gmail.com.
 [2021-01-24T21:12:32.598Z] info Server listening in port 3000!
 [2021-01-24T21:12:33.784Z] info /logOut (POST) Se intentó cerrar una sesión cerrada de kofsmorrizon@gmail.com.
+[2021-01-25T00:38:43.983Z] info Server listening in port 3000!
+[2021-01-27T02:09:24.619Z] info Server listening in port 3000!
+[2021-01-27T02:10:22.233Z] info Server listening in port 3000!
+[2021-01-27T02:11:22.199Z] info Server listening in port 3000!
+[2021-01-27T02:11:46.708Z] info Server listening in port 3000!
+[2021-01-27T02:11:54.662Z] info Server listening in port 3000!
+[2021-01-27T02:13:07.450Z] info Server listening in port 3000!
+[2021-01-27T02:13:08.626Z] info Server listening in port 3000!
+[2021-01-27T02:14:00.180Z] info Server listening in port 3000!
+[2021-01-27T02:14:02.580Z] info /logIn (POST) Se ingresó en la ruta con una entidad no procesable
+[2021-01-27T02:14:48.699Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T02:16:43.781Z] info Server listening in port 3000!
+[2021-01-27T02:17:50.803Z] info Server listening in port 3000!
+[2021-01-27T02:20:23.073Z] info Server listening in port 3000!
+[2021-01-27T02:20:25.485Z] info /registry (POST) El usuario intentó registrarse con el email: kofsmorrizon@gmail.com

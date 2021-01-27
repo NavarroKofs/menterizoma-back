@@ -12,6 +12,7 @@
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "express-sanitizer": "^1.0.5",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "node-cron": "^2.0.3",
