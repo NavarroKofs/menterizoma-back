@@ -118,7 +118,7 @@ app.post('/api/v1/singIn', (req, res) => {
 
 //Verificar usuario
 app.get('/userVerification', (req, res) => {
-    var key = req.query.key;
+    var key = req.sanitize(req.query.key);
 
     if(key != null && key != undefined){
         sQueryUpdate = 'UPDATE usuario SET lactivo=1, activationCode="" WHERE activationCode="' + key +'"';
@@ -186,7 +186,6 @@ app.post('/api/v1/logIn', (req, res) => {
                 }//fin:if
                 else{
                     Sha3Pass = new crypto.SHA3(512).update(password).digest('hex'); 
-                    console.log(Sha3Pass);
                     if(results.length > 0){
                         if(Sha3Pass == results[0].cpassword){
 
@@ -259,8 +258,8 @@ app.post('/api/v1/logIn', (req, res) => {
 
 //Cerrar la sesión y el Token JWT
 app.post('/logOut', (req, res) => {
-    var token = req.body.ctoken;
-    var email = req.body.email;
+    var token = req.sanitize(req.body.ctoken);
+    var email = req.sanitize(req.body.email);
     var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and cusuario  = "' + email + '" LIMIT 1'; 
     dbConn.query(sQueryDelete, (err, results, fields) => {
         if (err) {
@@ -324,7 +323,7 @@ function tokenIsActive(token) {
 //Ejemplo de creacion de middleware para procesar la peticiones antes de invocar los servicios
 protectedRoute.use((req, res, next) => {
     
-    const sToken = req.headers['token'];
+    const sToken = req.sanitize(req.headers['token']);
 
     if (sToken) {
         jwt.verify(sToken, app.get('secret_key'), (err, decoded) => {      
@@ -368,8 +367,6 @@ app.get('/api/datos', isAuthorized, (req, res) => {
 //-----------------------------------------------------------------------------
 
 function isAuthorized(req, res, next) {
-
-    console.log(req.headers['token']);
 
     if (req.headers['token'] !== undefined && req.headers['token'] !== null) {
         
@@ -540,7 +537,7 @@ function crawlServices() {
         }
     }
 
-    for (let index = 2; index < Object.keys(Curls).length; index++) {
+    for (let index = 0; index < Object.keys(Curls).length; index++) {
         let urlName = Object.keys(Curls)[index];
         let url = Curls[urlName]['url'];
         axios.get('https://api.factmaven.com/xml-to-json/?xml=' + url)
@@ -628,26 +625,27 @@ var sleep = (ms) => {
 }
 
 var generateResultado = (source, title, url, image, description) => {
-    let sQuerySelect = "select name from publicacion where url = '" + url +"'";
-    dbConn.query(
-        sQuerySelect, 
-        function (error, results, fields) {
-            if (results.length < 0) {
-                let sQueryInsert = 'INSERT INTO publicacion (source, url, name, img, desc)';
-                sQueryInsert += 'VALUES(?, ?, ?, ?, ?)';
-                let aDataInsert = [source, title, url, image, description];
-                console.log(aDataInsert);
-                dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
-                    if (err) {
-                        logger.info(err.message);
-                        throw err;
-                    } else {
-                        logger.info("/generateResultado se añadieron publicaciones a la base de datos.");
-                    }
-                });
+    if (url != null && url != undefined && url != "") {
+        let sQuerySelect = "select name from publicacion where url = '" + url +"'";
+        dbConn.query(
+            sQuerySelect, 
+            function (error, results, fields) {
+                if (results.length == 0) {
+                    let sQueryInsert = 'INSERT INTO publicacion (url, source, name, img, description)';
+                    sQueryInsert += 'VALUES(?, ?, ?, ?, ?)';
+                    let aDataInsert = [url, source, title, image, description];
+                    dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
+                        if (err) {
+                            logger.info(err.message);
+                            throw err;
+                        } else {
+                            logger.info("/generateResultado se añadieron publicaciones a la base de datos.");
+                        }
+                    });
+                }
             }
-        }
-    );
+        );
+    }
 }
 
 function eliminarHtml(cadena) {
@@ -661,7 +659,6 @@ app.listen(
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
-        crawlServices();
         // crawlServices();
         // cron.schedule('* * */4 * *', () => {
         //     crawlServices();
