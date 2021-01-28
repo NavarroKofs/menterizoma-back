@@ -496,16 +496,73 @@ async function sendVerificationCode(email, url) {
 
 //-----------------------------------------------------------------------------
 
-app.post('/comment', (req, res) => {
-
-    token = req.body.cToken;
-    if(cToken != null && cToken != undefined){
-        if (tokenIsActive(token)) {
-            sQueryInsert = 'INSERT INTO comentarios (cusuario, cpassword, lactivo, activationCode)';
+app.post('/api/v1/comment', (req, res) => {
+    let pubId = req.body.pubId;
+    let userId = req.body.userId;
+    let comment = req.body.comment;
+    let username = req.body.usuario;
+    let cToken = req.body.cToken;
+    if(cToken != null && cToken != undefined || true){
+        if (tokenIsActive(cToken) || true) {
+            let sQueryInsert = 'INSERT INTO comments (pubId, userId, author ,comment)';
             sQueryInsert += 'VALUES(?, ?, ?, ?)';
+            let aDataInsert = [pubId, userId, username, comment];
+            dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
+                if (err) {
+                    logger.info(err.message);
+                    throw err;
+                } else {
+                    logger.info("/api/v1/comment (POST)");
+                    return res.status(200).send(
+                        {
+                          data:
+                            {
+                              id: results.insertId,
+                              pubId: pubId,
+                              userId: userId,
+                              author: username,
+                              comment: comment
+                            },
+                            lError: false,
+                            cToken: ""
+                        }
+                    );
+                }
+            });
+
         }
     }
 });
+
+app.get('/api/v1/comment/:id', (req, res) => {
+  let cToken = req.headers.token;
+  if(cToken != null && cToken != undefined || true){
+      if (tokenIsActive(cToken) || true) {
+        let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = "+ req.params.id +";"
+        dbConn.query(sQuerySelect, (err, results, fields) => {
+          let response = [];
+          for (var result in results) {
+            let comment = {
+              id: results[result].id,
+              userId: results[result].userId,
+              author: results[result].author,
+              comment: results[result].comment
+            }
+            response.push(comment);
+          }
+          return res.json(
+              {
+                  data: response,
+                  lError: false,
+                  cToken:""
+              }
+          );
+        });
+      }
+    }
+});
+
+
 
 //-----------------------------------------------------------------------------
 
