@@ -4,17 +4,9 @@
   "description": "Proyecto final de la asignatura Desarrollo de Aplicaciones Web Ágiles. Servidor encargado de los comentarios en las noticias.",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
-    "server": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-=======
     "test": "echo \"Error: no test specified\" && exit 1",
-<<<<<<< HEAD
-    "start": "node index.js"
-=======
+    "start": "node index.js",
     "build": "node index.js"
->>>>>>> 7cd52bb090eeff3d9b4fb9304683c6ab818cb665
->>>>>>> main
   },
   "author": "Roberto Navarro",
   "license": "ISC",
