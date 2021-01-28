@@ -686,3 +686,45 @@
 [2021-01-27T03:57:09.389Z] info Server listening in port 3000!
 [2021-01-27T03:58:00.152Z] info Server listening in port 3000!
 [2021-01-27T04:34:32.084Z] info Server listening in port 3000!
+[2021-01-27T18:59:36.027Z] info Server listening in port 3000!
+[2021-01-28T01:17:05.424Z] info Server listening in port 3000!
+[2021-01-28T01:18:47.127Z] info Message sent: %s
+[2021-01-28T01:18:47.127Z] info Preview URL: %s
+[2021-01-28T01:18:47.128Z] info /registry (POST) Se le ha mandado un correo de verificación a kofsmorrizon@gmail.com
+[2021-01-28T01:19:30.828Z] info /verification (GET) Se ingresó el código98568a045d6c99ed52762718d8ad8e6614cda023414bd737afd89f91ea8c260bc46caeb3d3c5654e61b0b62e83c81dfa8c284c0be00b6cae37e87b658754aa14 para activar una cuenta.
+[2021-01-28T01:20:24.102Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-28T01:21:44.415Z] info Server listening in port 3000!
+[2021-01-28T01:21:51.889Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-28T01:39:57.011Z] info Server listening in port 3000!
+[2021-01-28T01:41:57.743Z] info Server listening in port 3000!
+[2021-01-28T01:42:01.815Z] info Server listening in port 3000!
+[2021-01-28T01:45:35.009Z] info Server listening in port 3000!
+[2021-01-28T01:52:10.695Z] info Server listening in port 3000!
+[2021-01-28T01:52:21.453Z] info Server listening in port 3000!
+[2021-01-28T01:53:44.634Z] info Server listening in port 3000!
+[2021-01-28T01:53:48.071Z] info Server listening in port 3000!
+[2021-01-28T01:54:01.746Z] info Server listening in port 3000!
+[2021-01-28T01:54:27.741Z] info Server listening in port 3000!
+[2021-01-28T01:56:08.458Z] info Server listening in port 3000!
+[2021-01-28T01:56:49.691Z] info Server listening in port 3000!
+[2021-01-28T02:05:02.913Z] info Server listening in port 3000!
+[2021-01-28T02:06:40.133Z] info Server listening in port 3000!
+[2021-01-28T02:07:01.993Z] info Server listening in port 3000!
+[2021-01-28T02:07:18.750Z] info Server listening in port 3000!
+[2021-01-28T02:07:58.160Z] info Server listening in port 3000!
+[2021-01-28T02:08:21.477Z] info Server listening in port 3000!
+[2021-01-28T02:08:44.842Z] info Server listening in port 3000!
+[2021-01-28T02:09:26.198Z] info Server listening in port 3000!
+[2021-01-28T02:11:09.699Z] info Server listening in port 3000!
+[2021-01-28T02:11:58.302Z] info Server listening in port 3000!
+[2021-01-28T02:13:24.549Z] info Server listening in port 3000!
+[2021-01-28T02:14:40.845Z] info Server listening in port 3000!
+[2021-01-28T02:14:47.824Z] info Server listening in port 3000!
+[2021-01-28T02:15:40.071Z] info Server listening in port 3000!
+[2021-01-28T02:16:42.200Z] info Server listening in port 3000!
+[2021-01-28T02:17:24.876Z] info Server listening in port 3000!
+[2021-01-28T02:17:31.164Z] info Server listening in port 3000!
+[2021-01-28T02:19:17.388Z] info Server listening in port 3000!
+[2021-01-28T02:21:43.608Z] info Server listening in port 3000!
+[2021-01-28T02:27:00.683Z] info Server listening in port 3000!
+[2021-01-28T02:27:21.405Z] info Server listening in port 3000!

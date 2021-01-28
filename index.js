@@ -43,11 +43,13 @@ app.get('/', (req, res) => res.send('Running node!'));
 
 //Registro
 app.post('/api/v1/signIn', (req, res) => {
-    var email = req.sanitize(req.body.email);
-    var password = req.sanitize(req.body.password);
-    var sQuerySelect = "select iid from usuario where cusuario = '" + email +"'";
+    let email = req.sanitize(req.body.email);
+    let password = req.sanitize(req.body.password);
+    let username = req.sanitize(req.body.username);
+
+    var sQuerySelect = "select iid from usuario where email = '" + email +"'";
     var Acode = "";
-    if((email != null && email != undefined) && (password != null && password != undefined)){
+    if((email != null && email != undefined) && (password != null && password != undefined) && (username != null && username != undefined)){
         dbConn.query(
             sQuerySelect, 
             function (error, results, fields) {
@@ -57,12 +59,12 @@ app.post('/api/v1/signIn', (req, res) => {
                 }//fin:if
                 else{
                     if ((results.length) == 0) {
-                        sQueryInsert = 'INSERT INTO usuario (cusuario, cpassword, lactivo, activationCode)';
-                        sQueryInsert += 'VALUES(?, ?, ?, ?)';
+                        sQueryInsert = 'INSERT INTO usuario (email, password, username, lactivo, activationCode)';
+                        sQueryInsert += 'VALUES(?, ?, ?, ?, ?)';
                         Sha3Pass = new crypto.SHA3(512).update(password).digest('hex');
                         Acode = '{"email":"'+ email +'","password":"'+ password +'"}';
                         ShaAcode = new crypto.SHA3(512).update(Acode).digest('hex');
-                        let aDataInsert = [email, Sha3Pass, 0, ShaAcode];
+                        let aDataInsert = [email, Sha3Pass, username, 0, ShaAcode];
                         dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
                             if (err) {
                                 logger.info(err.message);
@@ -167,7 +169,7 @@ app.post('/api/v1/logIn', (req, res) => {
     var username = req.sanitize(req.body.email);
     var password = req.sanitize(req.body.password);
 
-    var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 "; 
+    var sQuerySelect = "select iid, email, password, username from usuario where lactivo = 1 "; 
     var Sha3Pass = "";
     var sQueryInsert  = 'INSERT INTO tokens_jwt(ctoken, iid_usuario, cusuario, dtfecha_expira, lactivo) ';
         sQueryInsert += " VALUES(?, ?, ?, ?, ? )";
@@ -178,7 +180,7 @@ app.post('/api/v1/logIn', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
 
     if((username != null && username != undefined) && (password != null && password != undefined)){
-        sQuerySelect += " and cusuario = '" + username + "'";
+        sQuerySelect += " and email = '" + username + "'";
         dbConn.query(
             sQuerySelect, 
             function (error, results, fields) {
@@ -189,10 +191,10 @@ app.post('/api/v1/logIn', (req, res) => {
                 else{
                     Sha3Pass = new crypto.SHA3(512).update(password).digest('hex'); 
                     if(results.length > 0){
-                        if(Sha3Pass == results[0].cpassword){
+                        if(Sha3Pass == results[0].password){
 
                             tokenData = {
-                                usuario: results[0].cusuario
+                                usuario: results[0].email
                             }
                         
                             let dtExpire = new Date();
@@ -205,7 +207,7 @@ app.post('/api/v1/logIn', (req, res) => {
                             );
 
                             let aDataInsert = 
-                                [token,results[0].iid, results[0].cusuario, dtExpire, 1];
+                                [token,results[0].iid, results[0].email, dtExpire, 1];
 
                             dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
                                 if (err) {
@@ -218,7 +220,8 @@ app.post('/api/v1/logIn', (req, res) => {
                             return res.status(201).send({
                                 lError: false,
                                 cError: "",
-                                cToken: token
+                                cToken: token,
+                                username: results[0].username
                             });
                         }//fin:if
                         else{
@@ -262,7 +265,7 @@ app.post('/api/v1/logIn', (req, res) => {
 app.post('/logOut', (req, res) => {
     var token = req.sanitize(req.body.ctoken);
     var email = req.sanitize(req.body.email);
-    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and cusuario  = "' + email + '" LIMIT 1'; 
+    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and email  = "' + email + '" LIMIT 1'; 
     dbConn.query(sQueryDelete, (err, results, fields) => {
         if (err) {
             logger.info('/logOut (POST) ' + err.message);
@@ -502,7 +505,7 @@ async function sendVerificationCode(email, url) {
 
 //-----------------------------------------------------------------------------
 
-app.post('/comment', (req, res) => {
+app.post('/api/v1/comment', (req, res) => {
 
     token = req.body.cToken;
     if(cToken != null && cToken != undefined){
@@ -659,6 +662,64 @@ var generateResultado = (source, title, url, image, description) => {
 function eliminarHtml(cadena) {
     return cadena.replace(/<\/?[^>]+>/gi, '');
 }
+
+//-----------------------------------------------------------------------------
+
+app.get('/api/v1/publications', (req, res) => {
+    let resultados = [];
+    let source = req.sanitize(req.query.source);
+    if (source != undefined && source != null) {
+        var sQuerySelect = "select * from publicacion where source = '" + source +"' ORDER BY id desc Limit 100";
+        dbConn.query(
+            sQuerySelect, 
+            function (error, results, fields) {
+                if(error){
+                    logger.error(error.message);
+                    throw error;
+                }//fin:if
+                else{
+                    if ((results.length) > 0) {
+                        for (let aux = 0; aux < results.length; aux++) {
+                            let data = {
+                                "id": results[aux].id,
+                                "url": results[aux].url,
+                                "source": results[aux].source,
+                                "title": results[aux].name,
+                                "image": results[aux].img,
+                                "description": results[aux].description
+                            }
+                            resultados.push(data);
+                        }
+                        return res.status(200).send(
+                            {           
+                                lError: false,
+                                cError: "",
+                                cToken: "",
+                                data: resultados
+                            }
+                        );
+                    } else {
+                        return res.status(404).send(
+                            {           
+                                lError: true,
+                                cError: "No se encontraron resultados para " + source,
+                                cToken: ""
+                            }
+                        );
+                    }
+                }
+            }
+        );
+    } else {
+        return res.status(422).send(
+            {           
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
+});
 
 //-----------------------------------------------------------------------------
 
