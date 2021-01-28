@@ -99,3 +99,66 @@
 [2021-01-27T02:17:50.803Z] info Server listening in port 3000!
 [2021-01-27T02:20:23.073Z] info Server listening in port 3000!
 [2021-01-27T02:20:25.485Z] info /registry (POST) El usuario intentó registrarse con el email: kofsmorrizon@gmail.com
+[2021-01-27T03:36:02.492Z] info Server listening in port 3000!
+[2021-01-27T03:36:32.041Z] info Server listening in port 3000!
+[2021-01-27T03:36:40.005Z] info Server listening in port 3000!
+[2021-01-27T03:39:13.065Z] info Server listening in port 3000!
+[2021-01-27T03:39:22.521Z] info Server listening in port 3000!
+[2021-01-27T03:40:12.712Z] info Server listening in port 3000!
+[2021-01-27T03:40:31.794Z] info Server listening in port 3000!
+[2021-01-27T03:40:42.267Z] info Server listening in port 3000!
+[2021-01-27T03:40:54.043Z] info Server listening in port 3000!
+[2021-01-27T03:41:04.060Z] info Server listening in port 3000!
+[2021-01-27T03:41:09.233Z] info Server listening in port 3000!
+[2021-01-27T03:41:14.064Z] info Server listening in port 3000!
+[2021-01-27T03:41:17.884Z] info Server listening in port 3000!
+[2021-01-27T03:41:25.205Z] info Server listening in port 3000!
+[2021-01-27T03:43:51.451Z] info Server listening in port 3000!
+[2021-01-27T03:44:44.883Z] info Server listening in port 3000!
+[2021-01-27T03:52:02.459Z] info ER_BAD_FIELD_ERROR: Unknown column 'activationCode' in 'field list'
+[2021-01-27T03:52:14.227Z] info Server listening in port 3000!
+[2021-01-27T03:52:16.651Z] info ER_BAD_FIELD_ERROR: Unknown column 'activationCode' in 'field list'
+[2021-01-27T03:53:38.587Z] info Server listening in port 3000!
+[2021-01-27T03:53:42.903Z] info Message sent: %s
+[2021-01-27T03:53:42.904Z] info Preview URL: %s
+[2021-01-27T03:53:42.906Z] info /registry (POST) Se le ha mandado un correo de verificación a poiupio@hotmail.com
+[2021-01-27T03:56:07.007Z] info /verification (GET) Se ingresó el códigofb8af3bab21623914482c614976642259169c93d6aced07fa31ad2c6af282ae895c10115cc8cfc2bbe194a6d877c21c08cd018c07727febe0f5e1194943025e7 para activar una cuenta.
+[2021-01-27T03:58:11.246Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T16:43:32.458Z] info Server listening in port 3000!
+[2021-01-27T17:14:08.289Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T22:17:39.144Z] info Server listening in port 3000!
+[2021-01-27T22:39:16.160Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T22:56:54.871Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:00:29.372Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:06:29.795Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:06:45.549Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:13:09.369Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:13:57.956Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:14:48.986Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:15:30.852Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:15:57.592Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:23:05.175Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:23:12.826Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:23:50.663Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:23:57.351Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:25:07.940Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-27T23:25:12.948Z] info /logIn (POST) Se ingresó un password incorrecto desde (poner aquí la IP).
+[2021-01-27T23:26:57.489Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-27T23:27:07.601Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-28T00:16:45.834Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-28T00:21:39.666Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-28T00:32:18.071Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-28T00:32:33.470Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-28T01:01:08.863Z] info /registry (POST) Se ingresó en la ruta con una entidad no procesable
+[2021-01-28T01:01:56.600Z] info /registry (POST) Se ingresó en la ruta con una entidad no procesable
+[2021-01-28T01:03:14.638Z] info /registry (POST) Se ingresó en la ruta con una entidad no procesable
+[2021-01-28T01:04:21.790Z] info /registry (POST) Se ingresó en la ruta con una entidad no procesable
+[2021-01-28T01:04:44.543Z] info Message sent: %s
+[2021-01-28T01:04:44.544Z] info Preview URL: %s
+[2021-01-28T01:04:44.546Z] info /registry (POST) Se le ha mandado un correo de verificación a poiupio2@hotmail.com
+[2021-01-28T01:13:26.847Z] info Server listening in port 3000!
+[2021-01-28T01:13:47.920Z] info Message sent: %s
+[2021-01-28T01:13:47.922Z] info Preview URL: %s
+[2021-01-28T01:13:47.926Z] info /registry (POST) Se le ha mandado un correo de verificación a linnie68@ethereal.email
+[2021-01-28T01:15:13.969Z] info /verification (GET) Se ingresó el códigob59fbf64d398ddcee560555f5da6e681375a3179cc468fa378371aef25712c87daffc3a28c15692535c485a9735e8b413570a338daf026847c1d8272f230f6af para activar una cuenta.
+[2021-01-28T01:15:28.544Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
