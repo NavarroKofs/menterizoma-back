@@ -162,11 +162,7 @@ app.post('/api/v1/logIn', (req, res) => {
     var username = req.sanitize(req.body.email);
     var password = req.sanitize(req.body.password);
 
-<<<<<<< HEAD
-    var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 ";
-=======
-    var sQuerySelect = "select iid, email, password, username from usuario where lactivo = 1 "; 
->>>>>>> main
+    var sQuerySelect = "select iid, email, password, username from usuario where lactivo = 1 ";
     var Sha3Pass = "";
     var sQueryInsert  = 'INSERT INTO tokens_jwt(ctoken, iid_usuario, cusuario, dtfecha_expira, lactivo) ';
         sQueryInsert += " VALUES(?, ?, ?, ?, ? )";
@@ -186,12 +182,7 @@ app.post('/api/v1/logIn', (req, res) => {
                     throw error;
                 }//fin:if
                 else{
-<<<<<<< HEAD
                     Sha3Pass = new crypto.SHA3(512).update(password).digest('hex');
-                    console.log(Sha3Pass);
-=======
-                    Sha3Pass = new crypto.SHA3(512).update(password).digest('hex'); 
->>>>>>> main
                     if(results.length > 0){
                         if(Sha3Pass == results[0].password){
 
@@ -208,13 +199,8 @@ app.post('/api/v1/logIn', (req, res) => {
                                 }
                             );
 
-<<<<<<< HEAD
                             let aDataInsert =
-                                [token,results[0].iid, results[0].cusuario, dtExpire, 1];
-=======
-                            let aDataInsert = 
                                 [token,results[0].iid, results[0].email, dtExpire, 1];
->>>>>>> main
 
                             dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
                                 if (err) {
@@ -270,15 +256,9 @@ app.post('/api/v1/logIn', (req, res) => {
 
 //Cerrar la sesión y el Token JWT
 app.post('/logOut', (req, res) => {
-<<<<<<< HEAD
-    var token = req.body.ctoken;
-    var email = req.body.email;
-    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and cusuario  = "' + email + '" LIMIT 1';
-=======
     var token = req.sanitize(req.body.ctoken);
     var email = req.sanitize(req.body.email);
-    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and email  = "' + email + '" LIMIT 1'; 
->>>>>>> main
+    var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and email  = "' + email + '" LIMIT 1';
     dbConn.query(sQueryDelete, (err, results, fields) => {
         if (err) {
             logger.info('/logOut (POST) ' + err.message);
@@ -340,13 +320,8 @@ function tokenIsActive(token) {
 
 //Ejemplo de creacion de middleware para procesar la peticiones antes de invocar los servicios
 protectedRoute.use((req, res, next) => {
-<<<<<<< HEAD
 
-    const sToken = req.headers['token'];
-=======
-    
     const sToken = req.sanitize(req.headers['token']);
->>>>>>> main
 
     if (sToken) {
         jwt.verify(sToken, app.get('secret_key'), (err, decoded) => {
@@ -524,7 +499,6 @@ async function sendVerificationCode(email, url) {
 //-----------------------------------------------------------------------------
 
 app.post('/api/v1/comment', (req, res) => {
-<<<<<<< HEAD
     let pubId = req.body.pubId;
     let userId = req.body.userId;
     let comment = req.body.comment;
@@ -533,13 +507,6 @@ app.post('/api/v1/comment', (req, res) => {
     if(cToken != null && cToken != undefined || true){
         if (tokenIsActive(cToken) || true) {
             let sQueryInsert = 'INSERT INTO comments (pubId, userId, author ,comment)';
-=======
-
-    token = req.body.cToken;
-    if(cToken != null && cToken != undefined){
-        if (tokenIsActive(token)) {
-            sQueryInsert = 'INSERT INTO comentarios (cusuario, cpassword, lactivo, activationCode)';
->>>>>>> main
             sQueryInsert += 'VALUES(?, ?, ?, ?)';
             let aDataInsert = [pubId, userId, username, comment];
             dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
@@ -717,29 +684,10 @@ var sleep = (ms) => {
 //-----------------------------------------------------------------------------
 
 var generateResultado = (source, title, url, image, description) => {
-<<<<<<< HEAD
-    let sQuerySelect = "select name from publicacion where url = '" + url +"'";
-    dbConn.query(
-        sQuerySelect,
-        function (error, results, fields) {
-            if (results.length < 0) {
-                let sQueryInsert = 'INSERT INTO publicacion (source, url, name, img, desc)';
-                sQueryInsert += 'VALUES(?, ?, ?, ?, ?)';
-                let aDataInsert = [source, title, url, image, description];
-                console.log(aDataInsert);
-                dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
-                    if (err) {
-                        logger.info(err.message);
-                        throw err;
-                    } else {
-                        logger.info("/generateResultado se añadieron publicaciones a la base de datos.");
-                    }
-                });
-=======
     if (url != null && url != undefined && url != "") {
         let sQuerySelect = "select name from publicacion where url = '" + url +"'";
         dbConn.query(
-            sQuerySelect, 
+            sQuerySelect,
             function (error, results, fields) {
                 if (results.length == 0) {
                     let sQueryInsert = 'INSERT INTO publicacion (url, source, name, img, description)';
@@ -754,7 +702,6 @@ var generateResultado = (source, title, url, image, description) => {
                         }
                     });
                 }
->>>>>>> main
             }
         );
     }
@@ -774,7 +721,7 @@ app.get('/api/v1/publications', (req, res) => {
     if (source != undefined && source != null) {
         var sQuerySelect = "select * from publicacion where source = '" + source +"' ORDER BY id desc Limit 100";
         dbConn.query(
-            sQuerySelect, 
+            sQuerySelect,
             function (error, results, fields) {
                 if(error){
                     logger.error(error.message);
@@ -794,7 +741,7 @@ app.get('/api/v1/publications', (req, res) => {
                             resultados.push(data);
                         }
                         return res.status(200).send(
-                            {           
+                            {
                                 lError: false,
                                 cError: "",
                                 cToken: "",
@@ -803,7 +750,7 @@ app.get('/api/v1/publications', (req, res) => {
                         );
                     } else {
                         return res.status(404).send(
-                            {           
+                            {
                                 lError: true,
                                 cError: "No se encontraron resultados para " + source,
                                 cToken: ""
@@ -815,7 +762,7 @@ app.get('/api/v1/publications', (req, res) => {
         );
     } else {
         return res.status(422).send(
-            {           
+            {
                 lError: true,
                 cError: "Unprocessable Entity",
                 cToken: ""
