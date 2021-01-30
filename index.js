@@ -644,7 +644,9 @@ app.post('/api/v1/comment', (req, res) => {
                               pubId: pubId,
                               userId: userId,
                               author: username,
-                              comment: comment
+                              comment: comment,
+                              isEdited: 0,
+                              isDeleted: 0
                             },
                             lError: false,
                             cToken: ""
@@ -654,6 +656,75 @@ app.post('/api/v1/comment', (req, res) => {
             });
 
         }
+    }
+});
+
+app.put('/api/v1/comment/:id', (req, res) => {
+  let comment = req.body.comment;
+  let cToken = req.headers.token;
+  if(cToken != null && cToken != undefined || true){
+      if (tokenIsActive(cToken) || true) {
+        let sQueryUpdate = 'UPDATE seguridad.comments SET comment = "'+ comment +'", isEdited = 1 WHERE id = '+ req.params.id +";"
+        dbConn.query(sQueryUpdate, (err, results, fields) => {
+
+          let sQuerySelect = "SELECT * FROM seguridad.comments where id = "+ req.params.id +";"
+          dbConn.query(sQuerySelect, (err, results, fields) => {
+            let response = [];
+            for (var result in results) {
+              let comment = {
+                id: results[result].id,
+                userId: results[result].userId,
+                author: results[result].author,
+                comment: results[result].comment,
+                isEdited: results[result].isEdited,
+                isDeleted: results[result].isDeleted
+              }
+              response.push(comment);
+            }
+            return res.json(
+                {
+                    data: response,
+                    lError: false,
+                    cToken:""
+                }
+            );
+          });
+        });
+      }
+    }
+});
+
+app.delete('/api/v1/comment/:id', (req, res) => {
+  let comment = req.body.comment;
+  let cToken = req.headers.token;
+  if(cToken != null && cToken != undefined || true){
+      if (tokenIsActive(cToken) || true) {
+        let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = '+ req.params.id +";"
+        dbConn.query(sQueryUpdate, (err, results, fields) => {
+          let sQuerySelect = "SELECT * FROM seguridad.comments where id = "+ req.params.id +";"
+          dbConn.query(sQuerySelect, (err, results, fields) => {
+            let response = [];
+            for (var result in results) {
+              let comment = {
+                id: results[result].id,
+                userId: results[result].userId,
+                author: results[result].author,
+                comment: results[result].comment,
+                isEdited: results[result].isEdited,
+                isDeleted: results[result].isDeleted
+              }
+              response.push(comment);
+            }
+            return res.json(
+                {
+                    data: response,
+                    lError: false,
+                    cToken:""
+                }
+            );
+          });
+        });
+      }
     }
 });
 
@@ -669,7 +740,39 @@ app.get('/api/v1/comment/:id', (req, res) => {
               id: results[result].id,
               userId: results[result].userId,
               author: results[result].author,
-              comment: results[result].comment
+              comment: results[result].comment,
+              isEdited: results[result].isEdited,
+              isDeleted: results[result].isDeleted
+            }
+            response.push(comment);
+          }
+          return res.json(
+              {
+                  data: response,
+                  lError: false,
+                  cToken:""
+              }
+          );
+        });
+      }
+    }
+});
+
+app.get('/api/v1/publication/:id', (req, res) => {
+  let cToken = req.headers.token;
+  if(cToken != null && cToken != undefined || true){
+      if (tokenIsActive(cToken) || true) {
+        let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = "+ req.params.id +";"
+        dbConn.query(sQuerySelect, (err, results, fields) => {
+          let response = [];
+          for (var result in results) {
+            let comment = {
+              id: results[result].id,
+              url: results[result].ulr,
+              source: results[result].source,
+              name: results[result].name,
+              img: results[result].img,
+              description: results[result].description
             }
             response.push(comment);
           }
@@ -904,7 +1007,7 @@ app.listen(
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
-        // crawlServices();
+         crawlServices();
         // cron.schedule('* * */4 * *', () => {
         //     crawlServices();
         // });
