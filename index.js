@@ -64,9 +64,9 @@ app.post('/api/v1/signIn', (req, res) => {
                                 throw err;
                             } else {
                                 urlVerification = config.URL_BASE + apiUrlBase + "/userVerification?key=" + ShaAcode;
-                                sendVerificationCode(email, urlVerification);
+                                sendEmail(email, urlVerification, "This is your verification code. Click Here to activate your account", "Verification Code");
                                 logger.info("/registry (POST) Se le ha mandado un correo de verificación a " + email);
-                                return res.status(200).send(
+                                return res.status(201).send(
                                     {
                                         lError: false,
                                         cError: "Se le ha mandado un correo de verificación a " + email,
@@ -113,6 +113,119 @@ app.post('/api/v1/signIn', (req, res) => {
 
 //-----------------------------------------------------------------------------
 
+app.post('/api/v1/resetPassword', (req, res) => {
+    let email = req.sanitize(req.body.email);
+
+    if (email != null && email != undefined) {
+        let sQuerySelect = 'select username from usuario where lactivo = 1 and email = "' + email +' "';
+        dbConn.query(
+            sQuerySelect,
+            function (error, results, fields) {
+                if (error) {
+                    throw error;
+                }
+                if (results.length > 0) {
+                    let code = Math.random() + email + Math.random() + results[0].username + Math.random();
+                    let Sha3Code = crypto.SHA3(512).update(code).digest('hex');
+                    sQueryUpdate = 'UPDATE usuario SET resetCode="' + Sha3Code + '" where lactivo = 1 and email = "' + email +'"';
+                    console.log(sQueryUpdate);
+                    dbConn.query(sQueryUpdate, (err, results, fields) => {
+                        if (err) {
+                            throw err;
+                        }
+                        sendEmail(email, "", 'This is your reset password code: ' + Sha3Code, "Reset Password");
+                        return res.status(200).send(
+                            {
+                                lError: false,
+                                cError: "An email was sent to you with your code to reset your password.",
+                                cToken: ""
+                            }
+                        );
+                    });
+                } else {
+                    return res.status(404).send(
+                        {
+                            lError: true,
+                            cError: "This email was not found.",
+                            cToken: ""
+                        }
+                    );
+                }
+            }
+        );
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
+});
+
+//-----------------------------------------------------------------------------
+
+app.put('/api/v1/resetPassword', (req, res) => {
+    let email = req.sanitize(req.body.email);
+    let code = req.sanitize(req.body.code);
+    let password = req.sanitize(req.body.password)
+
+    if ((email != null && email != undefined) && (code != null && code != undefined)) {
+        let sQuerySelect = 'select resetCode from usuario where lactivo = 1 and email = "' + email +' "';
+        dbConn.query(
+            sQuerySelect,
+            function (error, results, fields) {
+                if (error) {
+                    throw error;
+                }
+                if (results.length > 0) {
+                    let Sha3Pass = crypto.SHA3(512).update(password).digest('hex');
+                    let sQueryUpdate = 'UPDATE usuario SET resetCode="", password="' + Sha3Pass +'" WHERE email="' + email +'" and resetCode = "' + code + '"';
+                    console.log(sQueryUpdate);
+                    dbConn.query(sQueryUpdate, (err, results, fields) => {
+                        if (results.affectedRows < 1) {
+                            return res.status(200).send(
+                                {
+                                    lError: true,
+                                    cError: "Invalid Code",
+                                    cToken: ""
+                                }
+                            );
+                        } else {
+                            return res.status(200).send(
+                                {
+                                    lError: true,
+                                    cError: "Password reseted!",
+                                    cToken: ""
+                                }
+                            );
+                        }
+                    });
+                } else {
+                    return res.status(404).send(
+                        {
+                            lError: true,
+                            cError: "This email was not found.",
+                            cToken: ""
+                        }
+                    );
+                }
+            }
+        );
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
+});
+
+//-----------------------------------------------------------------------------
+
 //Verificar usuario
 app.get('/api/v1/userVerification', (req, res) => {
     var key = req.sanitize(req.query.key);
@@ -131,7 +244,6 @@ app.get('/api/v1/userVerification', (req, res) => {
                 );
             } else {
                 logger.info('/verification (GET) Se ingresó el código' + key +' para activar una cuenta.');
-                console.log(results);
                 return res.status(200).send(
                     {
                         lError: true,
@@ -255,18 +367,18 @@ app.post('/api/v1/logIn', (req, res) => {
 //-----------------------------------------------------------------------------
 
 //Cerrar la sesión y el Token JWT
-app.post('/logOut', (req, res) => {
+app.delete('/logOut', (req, res) => {
     var token = req.sanitize(req.body.ctoken);
     var email = req.sanitize(req.body.email);
     var sQueryDelete = 'DELETE FROM tokens_jwt where ctoken = "' + token + '" and email  = "' + email + '" LIMIT 1';
     dbConn.query(sQueryDelete, (err, results, fields) => {
         if (err) {
-            logger.info('/logOut (POST) ' + err.message);
+            logger.info('/logOut (DELETE) ' + err.message);
             throw err;
         }
         if (results['affectedRows'] > 0) {
-            logger.info('/logOut (POST) Se ha cerrado la sesión del usuario ' + email + ".");
-            return res.status(200).send(
+            logger.info('/logOut (DELETE) Se ha cerrado la sesión del usuario ' + email + ".");
+            return res.status(204).send(
                 {
                     lError: false,
                     cError: "Se cerró la sesión correctamente.",
@@ -274,7 +386,7 @@ app.post('/logOut', (req, res) => {
                 }
             );
         } else {
-            logger.info('/logOut (POST) Se intentó cerrar una sesión cerrada de ' + email + ".");
+            logger.info('/logOut (DELETE) Se intentó cerrar una sesión cerrada de ' + email + ".");
             return res.status(200).send(
                 {
                     lError: false,
@@ -458,7 +570,16 @@ function getInformacionUsuario(_usuario){
 //-----------------------------------------------------------------------------
 
 // async..await is not allowed in global scope, must use a wrapper
-async function sendVerificationCode(email, url) {
+async function sendEmail(email, url, description, subject) {
+    let html = "";
+    if (subject == 'Verification Code') {
+        html = '<a href="'+ url +'" target="_blank">' + description + '</a>';
+    } else {
+        if (subject == 'Reset Password') {
+            html = '<p>' + description + '</p>';
+        }
+    }
+
     let transporter = nodemailer.createTransport({
       host: "smtp.ethereal.email",
       port: 587,
@@ -473,8 +594,8 @@ async function sendVerificationCode(email, url) {
     let info = {
       from: '"MenteRizoma👻" <noReply@menteRizoma.com>', // sender address
       to: email, // list of receivers
-      subject: "Verification Code", // Subject line
-      html: '<a href="'+ url +'" target="_blank">This is your verification code. Click Here to activate your account</a>', // html body
+      subject: subject, // Subject line
+      html: html, // html body
     };
 
     transporter.sendMail(info, (error, info) => {
@@ -523,7 +644,9 @@ app.post('/api/v1/comment', (req, res) => {
                               pubId: pubId,
                               userId: userId,
                               author: username,
-                              comment: comment
+                              comment: comment,
+                              isEdited: 0,
+                              isDeleted: 0
                             },
                             lError: false,
                             cToken: ""
@@ -533,6 +656,75 @@ app.post('/api/v1/comment', (req, res) => {
             });
 
         }
+    }
+});
+
+app.put('/api/v1/comment/:id', (req, res) => {
+  let comment = req.body.comment;
+  let cToken = req.headers.token;
+  if(cToken != null && cToken != undefined || true){
+      if (tokenIsActive(cToken) || true) {
+        let sQueryUpdate = 'UPDATE seguridad.comments SET comment = "'+ comment +'", isEdited = 1 WHERE id = '+ req.params.id +";"
+        dbConn.query(sQueryUpdate, (err, results, fields) => {
+
+          let sQuerySelect = "SELECT * FROM seguridad.comments where id = "+ req.params.id +";"
+          dbConn.query(sQuerySelect, (err, results, fields) => {
+            let response = [];
+            for (var result in results) {
+              let comment = {
+                id: results[result].id,
+                userId: results[result].userId,
+                author: results[result].author,
+                comment: results[result].comment,
+                isEdited: results[result].isEdited,
+                isDeleted: results[result].isDeleted
+              }
+              response.push(comment);
+            }
+            return res.json(
+                {
+                    data: response,
+                    lError: false,
+                    cToken:""
+                }
+            );
+          });
+        });
+      }
+    }
+});
+
+app.delete('/api/v1/comment/:id', (req, res) => {
+  let comment = req.body.comment;
+  let cToken = req.headers.token;
+  if(cToken != null && cToken != undefined || true){
+      if (tokenIsActive(cToken) || true) {
+        let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = '+ req.params.id +";"
+        dbConn.query(sQueryUpdate, (err, results, fields) => {
+          let sQuerySelect = "SELECT * FROM seguridad.comments where id = "+ req.params.id +";"
+          dbConn.query(sQuerySelect, (err, results, fields) => {
+            let response = [];
+            for (var result in results) {
+              let comment = {
+                id: results[result].id,
+                userId: results[result].userId,
+                author: results[result].author,
+                comment: results[result].comment,
+                isEdited: results[result].isEdited,
+                isDeleted: results[result].isDeleted
+              }
+              response.push(comment);
+            }
+            return res.json(
+                {
+                    data: response,
+                    lError: false,
+                    cToken:""
+                }
+            );
+          });
+        });
+      }
     }
 });
 
@@ -548,7 +740,39 @@ app.get('/api/v1/comment/:id', (req, res) => {
               id: results[result].id,
               userId: results[result].userId,
               author: results[result].author,
-              comment: results[result].comment
+              comment: results[result].comment,
+              isEdited: results[result].isEdited,
+              isDeleted: results[result].isDeleted
+            }
+            response.push(comment);
+          }
+          return res.json(
+              {
+                  data: response,
+                  lError: false,
+                  cToken:""
+              }
+          );
+        });
+      }
+    }
+});
+
+app.get('/api/v1/publication/:id', (req, res) => {
+  let cToken = req.headers.token;
+  if(cToken != null && cToken != undefined || true){
+      if (tokenIsActive(cToken) || true) {
+        let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = "+ req.params.id +";"
+        dbConn.query(sQuerySelect, (err, results, fields) => {
+          let response = [];
+          for (var result in results) {
+            let comment = {
+              id: results[result].id,
+              url: results[result].ulr,
+              source: results[result].source,
+              name: results[result].name,
+              img: results[result].img,
+              description: results[result].description
             }
             response.push(comment);
           }
@@ -783,7 +1007,7 @@ app.listen(
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
-        // crawlServices();
+         crawlServices();
         // cron.schedule('* * */4 * *', () => {
         //     crawlServices();
         // });
