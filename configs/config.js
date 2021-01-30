@@ -1,9 +1,9 @@
-module.exports = {    
+module.exports = {
     configdb : {
 		host: '127.0.0.1',
 		port:3306,
 		user: 'root',
-		password: 'admin',
+		password: 'Rocm971021',
 		database: 'seguridad'
 	},
 	CLAVE_SECRETA: "C1av3-53cr37a*",
