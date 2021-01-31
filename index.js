@@ -10,6 +10,7 @@ const axios      = require('axios');
 const cron = require('node-cron');
 const expressSanitizer = require('express-sanitizer');
 const { error } = require('winston');
+const { use } = require('chai');
 
 const port = 3000;
 
@@ -532,11 +533,21 @@ async function sendEmail(email, url, description, subject) {
 * @return  returns code 200 and the information of the insert in the database.
 */
 app.post('/api/v1/comment', protectedRoute, (req, res) => {
-    let pubId = req.body.pubId;
-    let userId = req.body.userId;
-    let comment = req.body.comment;
-    let username = req.body.usuario;
-    let cToken = req.body.cToken;
+    let pubId = req.sanitize(req.body.pubId);
+    let userId = req.sanitize(req.body.userId);
+    let comment = req.sanitize(req.body.comment);
+    let username = req.sanitize(req.body.usuario);
+
+    if ((pubId == null || pubId == undefined) || (userId == null || userId == undefined) ||
+    (comment == null || comment == undefined) || (username == null || username == undefined)) {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
 
     let sQueryInsert = 'INSERT INTO comments (pubId, userId, author ,comment)';
     sQueryInsert += 'VALUES(?, ?, ?, ?)';
@@ -573,18 +584,37 @@ app.post('/api/v1/comment', protectedRoute, (req, res) => {
 *
 * @param  id  id of the comment to edit.
 * @param  comment  string with the comment edited.
-* @param  cToken  token of the logged user.
+* @param  token  token of the logged user.
 * @return  returns code 200 and the information of the insert in the database.
 */
 app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
-    let comment = req.body.comment;
-    let cToken = req.headers.token;
+    let comment = req.sanitize(req.body.comment);
+    let id = req.sanitize(req.params.id);
+    if (id == null || id == undefined) {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
+
+    if (comment == null || comment == undefined) {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
 
     let sQueryUpdate = 'UPDATE seguridad.comments SET comment = ? , isEdited = 1 WHERE id = ?;';
-    dbConn.query(sQueryUpdate, [comment, req.params.id], (err, results, fields) => {
+    dbConn.query(sQueryUpdate, [comment, id], (err, results, fields) => {
 
       let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
-      dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+      dbConn.query(sQuerySelect, [id], (err, results, fields) => {
         let response = [];
         for (var result in results) {
           let comment = {
@@ -613,16 +643,24 @@ app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
   * Allows the user to delete an already created comment entry inside an especific publication
   *
   * @param  id  id of the comment to delete.
-  * @param  cToken  token of the logged user.
+  * @param  token  token of the logged user.
   * @return  returns code 204 and the information of the elimination in the database.
   */
 app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
-    let cToken = req.headers.token;
-
+    let id = req.sanitize(req.params.id);
+    if (id == null || id == undefined) {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
     let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = ? ;';
-    dbConn.query(sQueryUpdate, [req.params.id], (err, results, fields) => {
+    dbConn.query(sQueryUpdate, [id], (err, results, fields) => {
       let sQuerySelect = "SELECT * FROM seguridad.comments where id = ?;"
-      dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+      dbConn.query(sQuerySelect, [id], (err, results, fields) => {
         let response = [];
         for (var result in results) {
           let comment = {
@@ -653,8 +691,18 @@ app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
   * @return  returns code 200 and an array with the information of every comment in the publication.
   */
 app.get('/api/v1/comment/:id', (req, res) => {
+    let id = req.sanitize(req.params.id);
+    if (id == null || id == undefined) {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
     let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = ? ;"
-    dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+    dbConn.query(sQuerySelect, [id], (err, results, fields) => {
       let response = [];
       for (var result in results) {
         let comment = {
@@ -925,8 +973,18 @@ app.get('/api/v1/publications', (req, res) => {
 * @return  returns code 200 and the information of the publication of the id input.
 */
 app.get('/api/v1/publication/:id', (req, res) => {
+    let id = req.sanitize(req.params.id);
+    if (id == null || id == undefined) {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
     let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = ? ;"
-    dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+    dbConn.query(sQuerySelect, [id], (err, results, fields) => {
         if (err) {
             throw err;
         }
