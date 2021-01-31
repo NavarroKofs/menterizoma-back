@@ -9,6 +9,7 @@ const logger     = require('./utils/logger');
 const axios      = require('axios');
 const cron = require('node-cron');
 const expressSanitizer = require('express-sanitizer');
+const { error } = require('winston');
 
 const port = 3000;
 
@@ -23,14 +24,11 @@ app.use(bodyParser.json({limit:'10mb'}));
 app.use(expressSanitizer());
 
 app.set('secret_key', config.CLAVE_SECRETA);
-//-----------------------------------------------------------------------------
 
 // connection configurations
 var dbConn = mysql.createConnection(config.configdb);
 // connect to database
 dbConn.connect();
-
-//-----------------------------------------------------------------------------
 
 /**
 * Returns a status 201 and an array indicating that an email was sent and an indicator that no error occurred.
@@ -431,39 +429,12 @@ app.delete('/logOut', (req, res) => {
     });
 });
 
-//-----------------------------------------------------------------------------
-
-//Retorna true si está activo el token
-function tokenIsActive(token) {
-
-    var sToken = token;
-
-    if(!sToken){
-        return false;
-    };
-
-    sToken = sToken.replace('Bearer ', '');
-
-    try {
-        jwt.verify(sToken, config.CLAVE_SECRETA, function(err, user) {
-            if (err) {
-                logger.info(err.message);
-                return false;
-            }//fin:else
-            else {
-                return true;
-            }//fin:else
-        });
-    }
-    catch (ex) {
-        logger.info(ex.message);
-        return false;
-    }
-};//fin:get()
-
-//-----------------------------------------------------------------------------
-
-//Ejemplo de creacion de middleware para procesar la peticiones antes de invocar los servicios
+/**
+* Verify if the token is valid. It allows access to the routes that implement it.
+*
+* @param  token  the token previously
+* @return  return error if there is an error with status code 400.
+*/
 protectedRoute.use((req, res, next) => {
 
     const sToken = req.sanitize(req.headers['token']);
@@ -493,112 +464,6 @@ protectedRoute.use((req, res, next) => {
         );
     }//fin:else
 });// fin:else
-
-//-----------------------------------------------------------------------------
-
-app.get('/api/datos', isAuthorized, (req, res) => {
-
-    return res.json(
-        {
-            lError: false,
-            cError:"",
-            cMensaje:"Sucess"
-        }
-    );
-});//fin:get
-
-//-----------------------------------------------------------------------------
-
-function isAuthorized(req, res, next) {
-
-    if (req.headers['token'] !== undefined && req.headers['token'] !== null) {
-
-        let sToken = req.headers['token'];
-
-        //let privateKey = fs.readFileSync('./private.pem', 'utf8');
-        jwt.verify(sToken, app.get("secret_key"), { algorithm: "HS256" }, (err, user) => {
-            if (err) {
-                return res.status(401).json(
-                    {
-                        lError: true,
-                        cError:"El token de seguridad ya expiró."
-                    }
-                );
-            }//fin:if (err)
-            return next();
-        })
-    }//fin:if (typeof req.headers['token'] !== undefined && req.headers['token'] == null)
-    else {
-        //res.status(500).json({ error: "Not Authorized" });
-        return res.status(400).json(
-            {
-                lError: true,
-                cError: "El token no fue enviado en la cabecera de la petición."
-            }
-        );
-    }//fin:else
-}//fin:isAuthorized
-
-//-----------------------------------------------------------------------------
-
-app.post('/api/demo', (req, res) => {
-
-    var username = req.body.usuario;
-    //var password = req.body.password;
-
-    if((username != null && username != undefined)
-        //&& (password != null && password != undefined)
-    ){
-        getInformacionUsuario(username).then(function(oData) {
-            console.log(oData);
-
-            return res.json(oData);
-
-        }).catch((err) =>
-            setImmediate(() => {
-                throw err;
-            })
-        );
-    }//fin:if
-    else{
-        return res.status(400).send({
-            lError: true,
-            cError: "Los parámetros [usuario] y [password] son obligatorios",
-            cToken: ""
-        });
-    }//fin:else
-});//fin:get
-
-function getInformacionUsuario(_usuario){
-
-    return new Promise(function(resolve, reject) {
-
-        var oReturn = { "lError": "false", "cError": "", "iid" : 0, "cpassword": ""}
-        var sQuerySelect = "select iid, cusuario, cpassword from usuario where lactivo = 1 and cusuario = ?";
-        var Sha3Pass = "";
-
-        var query_params = [_usuario];
-
-        dbConn.query(sQuerySelect, query_params, function (err, rows, fields) {
-            if (err) {
-                return reject(err);
-            }//fin:if
-            if(rows.length > 0){
-                oReturn.lError = false;
-                oReturn.iid = rows[0].iid;
-                oReturn.cpassword = rows[0].cpassword;
-            }//fin:if
-            else{
-                oReturn.lError = true;
-                oReturn.cError = "No fue posible obtener la información del usuario";
-            }//fin:else
-            //resolve(rows);
-            resolve(oReturn);
-        });
-    });
-}//fin:getInformacionUsuario
-
-//-----------------------------------------------------------------------------
 
 /**
 * Allows you to send an email to a user account.
@@ -656,7 +521,6 @@ async function sendEmail(email, url, description, subject) {
     logger.info("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
 
-
 /**
 * Allows the user to create a new comment entry inside an especific publication
 *
@@ -667,7 +531,7 @@ async function sendEmail(email, url, description, subject) {
 * @param  cToken  token of the logged user.
 * @return  returns code 200 and the information of the insert in the database.
 */
-app.post('/api/v1/comment', (req, res) => {
+app.post('/api/v1/comment', protectedRoute, (req, res) => {
     let pubId = req.body.pubId;
     let userId = req.body.userId;
     let comment = req.body.comment;
@@ -730,7 +594,7 @@ app.post('/api/v1/comment', (req, res) => {
 * @param  cToken  token of the logged user.
 * @return  returns code 200 and the information of the insert in the database.
 */
-app.put('/api/v1/comment/:id', (req, res) => {
+app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
     let comment = req.body.comment;
     let cToken = req.headers.token;
     if(cToken != null && cToken != undefined || true){
@@ -789,7 +653,7 @@ app.put('/api/v1/comment/:id', (req, res) => {
   * @param  cToken  token of the logged user.
   * @return  returns code 204 and the information of the elimination in the database.
   */
-app.delete('/api/v1/comment/:id', (req, res) => {
+app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
     let cToken = req.headers.token;
     if(cToken != null && cToken != undefined || true){
         if (tokenIsActive(cToken) || true) {
@@ -842,53 +706,31 @@ app.delete('/api/v1/comment/:id', (req, res) => {
   * Allows the user to get every already created comment entry inside an especific publication
   *
   * @param  id  id of the publication which comments will be fetched.
-  * @param  cToken  token of the logged user.
   * @return  returns code 200 and an array with the information of every comment in the publication.
   */
 app.get('/api/v1/comment/:id', (req, res) => {
-    let cToken = req.headers.token;
-    if(cToken != null && cToken != undefined || true){
-        if (tokenIsActive(cToken) || true) {
-          let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = ? ;"
-          dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
-            let response = [];
-            for (var result in results) {
-              let comment = {
-                id: results[result].id,
-                userId: results[result].userId,
-                author: results[result].author,
-                comment: results[result].comment,
-                isEdited: results[result].isEdited,
-                isDeleted: results[result].isDeleted
-              }
-              response.push(comment);
-            }
-            return res.status(200).send(
-                {
-                    data: response,
-                    lError: false,
-                    cToken:""
-                }
-            );
-          });
-        } else {
-            return res.status(200).send(
-                {
-                    lError: true,
-                    cError: "Invalid token",
-                    cToken: ""
-                }
-            );
+    let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = ? ;"
+    dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+      let response = [];
+      for (var result in results) {
+        let comment = {
+          id: results[result].id,
+          userId: results[result].userId,
+          author: results[result].author,
+          comment: results[result].comment,
+          isEdited: results[result].isEdited,
+          isDeleted: results[result].isDeleted
         }
-    } else {
-        return res.status(422).send(
-            {
-                lError: true,
-                cError: "Unprocessable Entity",
-                cToken: ""
-            }
-        );
-    }
+        response.push(comment);
+      }
+      return res.status(200).send(
+          {
+              data: response,
+              lError: false,
+              cToken:""
+          }
+      );
+    });
 });
 
 /**
@@ -1004,7 +846,7 @@ function crawlServices() {
 }
 
 /**
-* Generates time where the application "does nothing" so as not to saturate the API that is consumed
+* Generates time where the application "does nothing" so as not to saturate the API that is consumed.
 *
 * @param  ms  time in milliseconds
 * @return  returns a promise that emulates the time the application "sleeps".
@@ -1013,18 +855,28 @@ var sleep = (ms) => {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
-//-----------------------------------------------------------------------------
-
+/**
+* Store into database the publications from a ssr feed.
+*
+* @param  source  source of the news
+* @param  title  title of a news
+* @param  url  url of the news in the feed (original url)
+* @param  image  image of the news
+* @param  description  principal part of the news, this describe the news
+*/
 var generateResultado = (source, title, url, image, description) => {
     if (url != null && url != undefined && url != "") {
         let sQuerySelect = "select name from publicacion where url = ?";
         dbConn.query(
             sQuerySelect, [url],
             function (error, results, fields) {
+                if (error) {
+                    throw error;
+                }
                 if (results.length == 0) {
                     let sQueryInsert = 'INSERT INTO publicacion (url, source, name, img, description)';
                     sQueryInsert += 'VALUES(?, ?, ?, ?, ?)';
-                    let aDataInsert = [url, source, title, image, description];
+                    let aDataInsert = [url, source, title, image, deleteEmojis(description)];
                     dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
                         if (err) {
                             logger.info(err.message);
@@ -1039,14 +891,32 @@ var generateResultado = (source, title, url, image, description) => {
     }
 }
 
-//-----------------------------------------------------------------------------
+/**
+* Delete emojis from an string
+*
+* @param  text  string text with emojis
+* @return  returns a string text without emojis.
+*/
+function deleteEmojis(text) {
+    return text.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+}
 
+/**
+* Delete HTML tags from an string
+*
+* @param  cadena  string text with html tags
+* @return  returns a string text without html tags.
+*/
 function eliminarHtml(cadena) {
     return cadena.replace(/<\/?[^>]+>/gi, '');
 }
 
-//-----------------------------------------------------------------------------
-
+/**
+* Get the last hunded news of a specific source
+*
+* @param  source  the specific source that want to get
+* @return  returns the data of the specific source (if exist) and status code 200.
+*/
 app.get('/api/v1/publications', (req, res) => {
     let resultados = [];
     let source = req.sanitize(req.query.source);
@@ -1103,44 +973,50 @@ app.get('/api/v1/publications', (req, res) => {
     }
 });
 
-//-----------------------------------------------------------------------------
-
+/**
+* Allows the user to fetch a publication from an especific id in the database
+*
+* @param  id  id of the publication that will be fetched
+* @param  cToken  token of the logged user.
+* @return  returns code 200 and the information of the publication of the id input.
+*/
 app.get('/api/v1/publication/:id', (req, res) => {
-    let cToken = req.headers.token;
-    if(cToken != null && cToken != undefined || true){
-        if (tokenIsActive(cToken) || true) {
-          let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = ? ;"
-          dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
-            let response = [];
-            for (var result in results) {
-              let comment = {
+    let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = ? ;"
+    dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+        if (err) {
+            throw err;
+        }
+        let response = [];
+        for (var result in results) {
+            let comment = {
                 id: results[result].id,
-                url: results[result].ulr,
+                url: results[result].url,
                 source: results[result].source,
                 name: results[result].name,
                 img: results[result].img,
                 description: results[result].description
-              }
-              response.push(comment);
             }
-            return res.json(
-                {
-                    data: response,
-                    lError: false,
-                    cToken:""
-                }
-            );
-          });
-        } else {
-            return res.status(200).send(
-                {
-                    lError: true,
-                    cError: "Invalid token",
-                    cToken: ""
-                }
-            );
+            response.push(comment);
         }
-    } else {
+        return res.status(200).send(
+            {
+                data: response,
+                lError: false,
+                cToken:""
+            }
+        );
+    });
+});
+
+/**
+* Allows a simple news search
+*
+* @param  query  query to search into database
+* @return  returns code 200 and the information of publications.
+*/
+app.get('/api/v1/search', (req, res) => {
+    let query = req.sanitize(req.query.query);
+    if (query == null || query == undefined) {
         return res.status(422).send(
             {
                 lError: true,
@@ -1149,9 +1025,54 @@ app.get('/api/v1/publication/:id', (req, res) => {
             }
         );
     }
-  });
-
-//-----------------------------------------------------------------------------
+    
+    var arrayDeCadenas = query.split(" ");
+    let palabras = [];
+    let sQuerySelect = "SELECT * from publicacion where ";
+    let respuesta = [];
+    for (let index = 0; index < arrayDeCadenas.length; index++) {
+        if (index == (arrayDeCadenas.length-1)) {
+            sQuerySelect = sQuerySelect + "name like ? ";
+        } else {
+            sQuerySelect = sQuerySelect + "name like ? or ";
+        }
+        palabras.push("%"+arrayDeCadenas[index]+"%");
+    }
+    sQuerySelect = sQuerySelect + "ORDER by id desc limit 100";
+    dbConn.query(
+        sQuerySelect, palabras,
+        function (error, results, fields) {
+            if (error) {
+                throw error;
+            }
+            if (results.length < 1) {
+                return res.status(404).send(
+                    {
+                        lError: true,
+                        cError: "Not Found",
+                    }
+                );
+            }
+            for (let result = 0; result < results.length; result++) {
+                let comment = {
+                        id: results[result].id,
+                        url: results[result].url,
+                        source: results[result].source,
+                        name: results[result].name,
+                        img: results[result].img,
+                        description: results[result].description
+                    }
+                respuesta.push(comment);
+            }
+            return res.status(200).send(
+                {
+                    data: respuesta,
+                    lError: false,
+                }
+            );
+        }
+    );
+});
 
 /**
 * Returns 404 if an undefined path is entered or that does not use the correct method
@@ -1163,6 +1084,16 @@ app.use(function(req, res){
 });
 
 /**
+* Allows you to run the crawling process every four hours 
+*
+*/
+function cronJob() {
+    cron.schedule('* * */4 * *', () => {
+        crawlServices();
+    });
+}
+
+/**
 * Start the application and make the cron job available
 *
 */
@@ -1171,9 +1102,7 @@ app.listen(
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
-        // crawlServices();
-        // cron.schedule('* * */4 * *', () => {
-        //     crawlServices();
-        // });
+        crawlServices();
+        cronJob();
     }
 );
