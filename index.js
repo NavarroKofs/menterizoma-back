@@ -693,7 +693,23 @@ app.post('/api/v1/comment', (req, res) => {
                     );
                 }
             });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
     }
 });
 
@@ -713,6 +729,7 @@ app.put('/api/v1/comment/:id', (req, res) => {
               for (var result in results) {
                 let comment = {
                   id: results[result].id,
+                  pubId: results[result].pubId,
                   userId: results[result].userId,
                   author: results[result].author,
                   comment: results[result].comment,
@@ -721,7 +738,7 @@ app.put('/api/v1/comment/:id', (req, res) => {
                 }
                 response.push(comment);
               }
-              return res.json(
+              return res.status(200).send(
                   {
                       data: response,
                       lError: false,
@@ -730,7 +747,23 @@ app.put('/api/v1/comment/:id', (req, res) => {
               );
             });
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
+      } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
       }
   });
 
@@ -757,7 +790,7 @@ app.delete('/api/v1/comment/:id', (req, res) => {
                 }
                 response.push(comment);
               }
-              return res.json(
+              return res.status(204).send(
                   {
                       data: response,
                       lError: false,
@@ -766,9 +799,25 @@ app.delete('/api/v1/comment/:id', (req, res) => {
               );
             });
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
-      }
-  });
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
+});
 
 //-----------------------------------------------------------------------------
 
@@ -790,7 +839,7 @@ app.get('/api/v1/comment/:id', (req, res) => {
               }
               response.push(comment);
             }
-            return res.json(
+            return res.status(200).send(
                 {
                     data: response,
                     lError: false,
@@ -798,7 +847,23 @@ app.get('/api/v1/comment/:id', (req, res) => {
                 }
             );
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
     }
 });
 
@@ -1042,14 +1107,27 @@ app.get('/api/v1/publication/:id', (req, res) => {
                 }
             );
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
-      }
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
   });
 
 //-----------------------------------------------------------------------------
-
-//QR CODE
-//https://chart.googleapis.com/chart?cht=qr&chl=https://www.qrcode-monkey.com/qr-code-api-with-logo&chs=200x200
 
 /**
 * Returns 404 if an undefined path is entered or that does not use the correct method
