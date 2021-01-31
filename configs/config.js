@@ -3,7 +3,7 @@ module.exports = {
 		host: '127.0.0.1',
 		port:3306,
 		user: 'root',
-		password: 'Rocm971021',
+		password: 'admin',
 		database: 'seguridad'
 	},
 	CLAVE_SECRETA: "C1av3-53cr37a*",
