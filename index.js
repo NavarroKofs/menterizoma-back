@@ -537,53 +537,35 @@ app.post('/api/v1/comment', protectedRoute, (req, res) => {
     let comment = req.body.comment;
     let username = req.body.usuario;
     let cToken = req.body.cToken;
-    if(cToken != null && cToken != undefined || true){
-        if (tokenIsActive(cToken) || true) {
-            let sQueryInsert = 'INSERT INTO comments (pubId, userId, author ,comment)';
-            sQueryInsert += 'VALUES(?, ?, ?, ?)';
-            let aDataInsert = [pubId, userId, username, comment];
-            dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
-                if (err) {
-                    logger.info(err.message);
-                    throw err;
-                } else {
-                    logger.info("/api/v1/comment (POST)");
-                    return res.status(200).send(
-                        {
-                          data:
-                            {
-                              id: results.insertId,
-                              pubId: pubId,
-                              userId: userId,
-                              author: username,
-                              comment: comment,
-                              isEdited: 0,
-                              isDeleted: 0
-                            },
-                            lError: false,
-                            cToken: ""
-                        }
-                    );
-                }
-            });
+
+    let sQueryInsert = 'INSERT INTO comments (pubId, userId, author ,comment)';
+    sQueryInsert += 'VALUES(?, ?, ?, ?)';
+
+    let aDataInsert = [pubId, userId, username, comment];
+    dbConn.query(sQueryInsert, aDataInsert, (err, results, fields) => {
+        if (err) {
+            logger.info(err.message);
+            throw err;
         } else {
+            logger.info("/api/v1/comment (POST)");
             return res.status(200).send(
                 {
-                    lError: true,
-                    cError: "Invalid token",
+                  data:
+                    {
+                      id: results.insertId,
+                      pubId: pubId,
+                      userId: userId,
+                      author: username,
+                      comment: comment,
+                      isEdited: 0,
+                      isDeleted: 0
+                    },
+                    lError: false,
                     cToken: ""
                 }
             );
         }
-    } else {
-        return res.status(422).send(
-            {
-                lError: true,
-                cError: "Unprocessable Entity",
-                cToken: ""
-            }
-        );
-    }
+    });
 });
 
 /**
@@ -597,53 +579,34 @@ app.post('/api/v1/comment', protectedRoute, (req, res) => {
 app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
     let comment = req.body.comment;
     let cToken = req.headers.token;
-    if(cToken != null && cToken != undefined || true){
-        if (tokenIsActive(cToken) || true) {
-          let sQueryUpdate = 'UPDATE seguridad.comments SET comment = ? , isEdited = 1 WHERE id = ?;';
-          dbConn.query(sQueryUpdate, [comment, req.params.id], (err, results, fields) => {
 
-            let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
-            dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
-              let response = [];
-              for (var result in results) {
-                let comment = {
-                  id: results[result].id,
-                  pubId: results[result].pubId,
-                  userId: results[result].userId,
-                  author: results[result].author,
-                  comment: results[result].comment,
-                  isEdited: results[result].isEdited,
-                  isDeleted: results[result].isDeleted
-                }
-                response.push(comment);
-              }
-              return res.status(200).send(
-                  {
-                      data: response,
-                      lError: false,
-                      cToken:""
-                  }
-              );
-            });
-          });
-        } else {
-            return res.status(200).send(
-                {
-                    lError: true,
-                    cError: "Invalid token",
-                    cToken: ""
-                }
-            );
+    let sQueryUpdate = 'UPDATE seguridad.comments SET comment = ? , isEdited = 1 WHERE id = ?;';
+    dbConn.query(sQueryUpdate, [comment, req.params.id], (err, results, fields) => {
+
+      let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
+      dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+        let response = [];
+        for (var result in results) {
+          let comment = {
+            id: results[result].id,
+            pubId: results[result].pubId,
+            userId: results[result].userId,
+            author: results[result].author,
+            comment: results[result].comment,
+            isEdited: results[result].isEdited,
+            isDeleted: results[result].isDeleted
+          }
+          response.push(comment);
         }
-      } else {
-        return res.status(422).send(
+        return res.status(200).send(
             {
-                lError: true,
-                cError: "Unprocessable Entity",
-                cToken: ""
+                data: response,
+                lError: false,
+                cToken:""
             }
         );
-      }
+      });
+    });
   });
 
   /**
@@ -655,51 +618,32 @@ app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
   */
 app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
     let cToken = req.headers.token;
-    if(cToken != null && cToken != undefined || true){
-        if (tokenIsActive(cToken) || true) {
-          let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = ? ;';
-          dbConn.query(sQueryUpdate, [req.params.id], (err, results, fields) => {
-            let sQuerySelect = "SELECT * FROM seguridad.comments where id = ?;"
-            dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
-              let response = [];
-              for (var result in results) {
-                let comment = {
-                  id: results[result].id,
-                  userId: results[result].userId,
-                  author: results[result].author,
-                  comment: results[result].comment,
-                  isEdited: results[result].isEdited,
-                  isDeleted: results[result].isDeleted
-                }
-                response.push(comment);
-              }
-              return res.status(204).send(
-                  {
-                      data: response,
-                      lError: false,
-                      cToken:""
-                  }
-              );
-            });
-          });
-        } else {
-            return res.status(200).send(
-                {
-                    lError: true,
-                    cError: "Invalid token",
-                    cToken: ""
-                }
-            );
+
+    let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = ? ;';
+    dbConn.query(sQueryUpdate, [req.params.id], (err, results, fields) => {
+      let sQuerySelect = "SELECT * FROM seguridad.comments where id = ?;"
+      dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+        let response = [];
+        for (var result in results) {
+          let comment = {
+            id: results[result].id,
+            userId: results[result].userId,
+            author: results[result].author,
+            comment: results[result].comment,
+            isEdited: results[result].isEdited,
+            isDeleted: results[result].isDeleted
+          }
+          response.push(comment);
         }
-    } else {
-        return res.status(422).send(
+        return res.status(204).send(
             {
-                lError: true,
-                cError: "Unprocessable Entity",
-                cToken: ""
+                data: response,
+                lError: false,
+                cToken:""
             }
         );
-    }
+      });
+    });
 });
 
   /**
