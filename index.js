@@ -33,14 +33,14 @@ dbConn.connect();
 //-----------------------------------------------------------------------------
 
 /**
-* Returns a status 201 and an array indicating that an email was sent and an indicator that no error occurred. 
+* Returns a status 201 and an array indicating that an email was sent and an indicator that no error occurred.
 * When an error ocurrs, return lError true and the respective status code and description.
 * This route allows creating a user route.
 *
 * @param  email  the email with which the user is going to register
 * @param  password  the password with which the user is going to register
 * @param  username the username with which the user will register
-* @return  returns code 201 if everything was successful or an error code and its description if something went wrong  
+* @return  returns code 201 if everything was successful or an error code and its description if something went wrong
 */
 app.post('/api/v1/signIn', (req, res) => {
     let email = req.sanitize(req.body.email);
@@ -119,12 +119,12 @@ app.post('/api/v1/signIn', (req, res) => {
 });
 
 /**
-* Returns a status 200 and an array indicating that an email was sent and an indicator that no error occurred. 
+* Returns a status 200 and an array indicating that an email was sent and an indicator that no error occurred.
 * When an error ocurrs, return lError true and the respective status code and description.
 * This route sends an email with the reset code.
 *
 * @param  email  the email with which the user is registered in the app
-* @return  returns code 200 if everything was successful or an error code and its description if something went wrong  
+* @return  returns code 200 if everything was successful or an error code and its description if something went wrong
 */
 app.post('/api/v1/resetPassword', (req, res) => {
     let email = req.sanitize(req.body.email);
@@ -178,14 +178,14 @@ app.post('/api/v1/resetPassword', (req, res) => {
 });
 
 /**
-* Returns a 200 status and an array indicating that the password has been updated and an indicator that no error occurred.  
+* Returns a 200 status and an array indicating that the password has been updated and an indicator that no error occurred.
 * When an error ocurrs, return lError true and the respective status code and description.
 * This path allows changing the password of a user account .
 *
 * @param  email  the email with which the user is registered in the app
 * @param  code  the code that was previously sent by email to reset the password
 * @param  password  the new password
-* @return  returns code 200 if everything was successful (and you can log in with your new credentials) or an error code and its description if something went wrong  
+* @return  returns code 200 if everything was successful (and you can log in with your new credentials) or an error code and its description if something went wrong
 */
 app.put('/api/v1/resetPassword', (req, res) => {
     let email = req.sanitize(req.body.email);
@@ -246,12 +246,12 @@ app.put('/api/v1/resetPassword', (req, res) => {
 });
 
 /**
-* Returns a 200 status and an array indicating that the account is active and an indicator that no error occurred.  
+* Returns a 200 status and an array indicating that the account is active and an indicator that no error occurred.
 * When an error ocurrs, return lError true and the respective status code and description.
 * This path allows activating the previously created user account.
 *
 * @param  key  the key that was emailed
-* @return  returns code 200 if everything was successful or an error code and its description if something went wrong  
+* @return  returns code 200 if everything was successful or an error code and its description if something went wrong
 */
 app.get('/api/v1/userVerification', (req, res) => {
     var key = req.sanitize(req.query.key);
@@ -293,13 +293,13 @@ app.get('/api/v1/userVerification', (req, res) => {
 });
 
 /**
-* Returns a 201 status and an indicator that no error occurred.  
+* Returns a 201 status and an indicator that no error occurred.
 * When an error ocurrs, return lError true and the respective status code and description.
 * This path allows the user to log in as long as the credentials are correct.
 *
 * @param  email  the email of the user registered in the app
 * @param  password  the password of the user registered in the app
-* @return  returns code 201 if everything was successful or an error code and its description if something went wrong  
+* @return  returns code 201 if everything was successful or an error code and its description if something went wrong
 */
 app.post('/api/v1/logIn', (req, res) => {
 
@@ -605,8 +605,8 @@ function getInformacionUsuario(_usuario){
 *
 * @param  email  the email of the user registered in the app
 * @param  url  the url that will help us execute the verification code
-* @param  description  the description that we want to send in the email 
-* @param  subject  the subject that we will insert in the email 
+* @param  description  the description that we want to send in the email
+* @param  subject  the subject that we will insert in the email
 * @return  returns code 200 if everything was successful.
 */
 async function sendEmail(email, url, description, subject) {
@@ -656,8 +656,17 @@ async function sendEmail(email, url, description, subject) {
     logger.info("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
 
-//-----------------------------------------------------------------------------
 
+/**
+* Allows the user to create a new comment entry inside an especific publication
+*
+* @param  pubId  id of the publication where the comment is found.
+* @param  userId  id of the user that created the comment.
+* @param  comment  string with the comment created.
+* @param  usuario  name of the author of the comment.
+* @param  cToken  token of the logged user.
+* @return  returns code 200 and the information of the insert in the database.
+*/
 app.post('/api/v1/comment', (req, res) => {
     let pubId = req.body.pubId;
     let userId = req.body.userId;
@@ -697,8 +706,14 @@ app.post('/api/v1/comment', (req, res) => {
     }
 });
 
-//-----------------------------------------------------------------------------
-
+/**
+* Allows the user to edit an already created comment entry inside an especific publication
+*
+* @param  id  id of the comment to edit.
+* @param  comment  string with the comment edited.
+* @param  cToken  token of the logged user.
+* @return  returns code 200 and the information of the insert in the database.
+*/
 app.put('/api/v1/comment/:id', (req, res) => {
     let comment = req.body.comment;
     let cToken = req.headers.token;
@@ -706,7 +721,7 @@ app.put('/api/v1/comment/:id', (req, res) => {
         if (tokenIsActive(cToken) || true) {
           let sQueryUpdate = 'UPDATE seguridad.comments SET comment = ? , isEdited = 1 WHERE id = ?;';
           dbConn.query(sQueryUpdate, [comment, req.params.id], (err, results, fields) => {
-  
+
             let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
             dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
               let response = [];
@@ -734,10 +749,14 @@ app.put('/api/v1/comment/:id', (req, res) => {
       }
   });
 
-//-----------------------------------------------------------------------------
-
+  /**
+  * Allows the user to delete an already created comment entry inside an especific publication
+  *
+  * @param  id  id of the comment to delete.
+  * @param  cToken  token of the logged user.
+  * @return  returns code 204 and the information of the elimination in the database.
+  */
 app.delete('/api/v1/comment/:id', (req, res) => {
-    let comment = req.body.comment;
     let cToken = req.headers.token;
     if(cToken != null && cToken != undefined || true){
         if (tokenIsActive(cToken) || true) {
@@ -770,8 +789,13 @@ app.delete('/api/v1/comment/:id', (req, res) => {
       }
   });
 
-//-----------------------------------------------------------------------------
-
+  /**
+  * Allows the user to get every already created comment entry inside an especific publication
+  *
+  * @param  id  id of the publication which comments will be fetched.
+  * @param  cToken  token of the logged user.
+  * @return  returns code 200 and an array with the information of every comment in the publication.
+  */
 app.get('/api/v1/comment/:id', (req, res) => {
     let cToken = req.headers.token;
     if(cToken != null && cToken != undefined || true){
@@ -915,7 +939,7 @@ function crawlServices() {
 }
 
 /**
-* Generates time where the application "does nothing" so as not to saturate the API that is consumed 
+* Generates time where the application "does nothing" so as not to saturate the API that is consumed
 *
 * @param  ms  time in milliseconds
 * @return  returns a promise that emulates the time the application "sleeps".
@@ -1061,7 +1085,7 @@ app.use(function(req, res){
 });
 
 /**
-* Start the application and make the cron job available 
+* Start the application and make the cron job available
 *
 */
 app.listen(
