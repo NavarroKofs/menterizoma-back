@@ -162,3 +162,127 @@
 [2021-01-28T01:13:47.926Z] info /registry (POST) Se le ha mandado un correo de verificación a linnie68@ethereal.email
 [2021-01-28T01:15:13.969Z] info /verification (GET) Se ingresó el códigob59fbf64d398ddcee560555f5da6e681375a3179cc468fa378371aef25712c87daffc3a28c15692535c485a9735e8b413570a338daf026847c1d8272f230f6af para activar una cuenta.
 [2021-01-28T01:15:28.544Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-30T21:56:28.948Z] info Server listening in port 3000!
+[2021-01-30T21:57:04.755Z] info Server listening in port 3000!
+[2021-01-30T21:57:19.400Z] info Server listening in port 3000!
+[2021-01-30T21:57:40.421Z] info Server listening in port 3000!
+[2021-01-30T23:23:49.844Z] info Server listening in port 3000!
+[2021-01-30T23:24:13.081Z] info Server listening in port 3000!
+[2021-01-30T23:25:32.705Z] info Server listening in port 3000!
+[2021-01-30T23:25:48.088Z] info Server listening in port 3000!
+[2021-01-30T23:26:17.811Z] info Server listening in port 3000!
+[2021-01-30T23:27:39.631Z] info Server listening in port 3000!
+[2021-01-30T23:27:50.820Z] info Server listening in port 3000!
+[2021-01-30T23:27:58.013Z] info Server listening in port 3000!
+[2021-01-30T23:28:07.228Z] info Server listening in port 3000!
+[2021-01-30T23:28:14.777Z] info Server listening in port 3000!
+[2021-01-30T23:29:46.830Z] info Server listening in port 3000!
+[2021-01-30T23:29:49.231Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.233Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.236Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.238Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.241Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.243Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.245Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.246Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.247Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.249Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.251Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.253Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.666Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.668Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.669Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.671Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.673Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.677Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.680Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.681Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.683Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.684Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.693Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.695Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.697Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.699Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.700Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.701Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.703Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.704Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.707Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:49.709Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.037Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.038Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.041Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.043Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.045Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.046Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.047Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.049Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.051Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.052Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.053Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.054Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.056Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.057Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.058Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.062Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.064Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.065Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.066Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.068Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.070Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.085Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.087Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.089Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.091Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.092Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.096Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.098Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.100Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.101Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.102Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.104Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.106Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.108Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.109Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.111Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.112Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.113Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.114Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.117Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.119Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.120Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.122Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.123Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.124Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.127Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.129Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.130Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.132Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.133Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:29:50.135Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-30T23:39:09.443Z] info Server listening in port 3000!
+[2021-01-31T00:52:29.643Z] info Server listening in port 3000!
+[2021-01-31T00:52:31.731Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:31.735Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:31.839Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:31.843Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:31.866Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:31.870Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:31.873Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:32.634Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:32.637Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:52:32.641Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T00:56:17.795Z] info /logIn (POST) ER_BAD_FIELD_ERROR: Unknown column 'email' in 'field list'
+[2021-01-31T00:59:11.560Z] info Server listening in port 3000!
+[2021-01-31T00:59:57.111Z] info /logIn (POST) ER_BAD_FIELD_ERROR: Unknown column 'password' in 'field list'
+[2021-01-31T01:01:24.188Z] info Server listening in port 3000!
+[2021-01-31T01:02:19.978Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-31T01:03:53.894Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-31T01:04:19.253Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-31T01:05:09.582Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-31T01:05:13.258Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-31T01:05:42.594Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-31T01:06:20.579Z] info /logIn (POST) Se intentó iniciar sesión con una cuenta de usuario no registrada.
+[2021-01-31T01:06:59.880Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-31T01:07:38.660Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-31T01:30:45.239Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
