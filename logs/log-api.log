@@ -288,3 +288,16 @@
 [2021-01-31T01:30:45.239Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
 [2021-01-31T01:43:10.134Z] info Server listening in port 3000!
 [2021-01-31T01:44:22.760Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-31T02:04:02.759Z] info Server listening in port 3000!
+[2021-01-31T03:45:24.410Z] info Server listening in port 3000!
+[2021-01-31T06:23:49.804Z] info Server listening in port 3000!
+[2021-01-31T06:27:37.605Z] info jwt malformed
+[2021-01-31T06:28:33.693Z] info jwt malformed
+[2021-01-31T06:41:53.134Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-31T20:42:01.484Z] info Server listening in port 3000!
+[2021-01-31T20:43:38.458Z] info Server listening in port 3000!
+[2021-01-31T23:04:29.482Z] info jwt malformed
+[2021-01-31T23:04:29.506Z] info /api/v1/comment (POST)
+[2021-01-31T23:16:43.695Z] info ER_BAD_NULL_ERROR: Column 'pubId' cannot be null
+[2021-01-31T23:18:24.785Z] info Server listening in port 3000!
+[2021-01-31T23:18:42.533Z] info ER_BAD_NULL_ERROR: Column 'pubId' cannot be null
