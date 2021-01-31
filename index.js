@@ -29,8 +29,6 @@ app.set('secret_key', config.CLAVE_SECRETA);
 var dbConn = mysql.createConnection(config.configdb);
 // connect to database
 dbConn.connect();
-//Home
-app.get('/', (req, res) => res.send('Running node!'));
 
 //-----------------------------------------------------------------------------
 
@@ -40,11 +38,11 @@ app.post('/api/v1/signIn', (req, res) => {
     let password = req.sanitize(req.body.password);
     let username = req.sanitize(req.body.username);
 
-    var sQuerySelect = "select iid from usuario where email = '" + email +"'";
+    var sQuerySelect = "select iid from usuario where email = ?";
     var Acode = "";
     if((email != null && email != undefined) && (password != null && password != undefined) && (username != null && username != undefined)){
         dbConn.query(
-            sQuerySelect,
+            sQuerySelect, [email],
             function (error, results, fields) {
                 if(error){
                     logger.error(error.message);
@@ -117,9 +115,9 @@ app.post('/api/v1/resetPassword', (req, res) => {
     let email = req.sanitize(req.body.email);
 
     if (email != null && email != undefined) {
-        let sQuerySelect = 'select username from usuario where lactivo = 1 and email = "' + email +' "';
+        let sQuerySelect = 'select username from usuario where lactivo = 1 and email = ?';
         dbConn.query(
-            sQuerySelect,
+            sQuerySelect, [email],
             function (error, results, fields) {
                 if (error) {
                     throw error;
@@ -127,9 +125,9 @@ app.post('/api/v1/resetPassword', (req, res) => {
                 if (results.length > 0) {
                     let code = Math.random() + email + Math.random() + results[0].username + Math.random();
                     let Sha3Code = crypto.SHA3(512).update(code).digest('hex');
-                    sQueryUpdate = 'UPDATE usuario SET resetCode="' + Sha3Code + '" where lactivo = 1 and email = "' + email +'"';
+                    sQueryUpdate = 'UPDATE usuario SET resetCode= ? where lactivo = 1 and email = ?';
                     console.log(sQueryUpdate);
-                    dbConn.query(sQueryUpdate, (err, results, fields) => {
+                    dbConn.query(sQueryUpdate, [Sha3Code, email], (err, results, fields) => {
                         if (err) {
                             throw err;
                         }
@@ -172,18 +170,18 @@ app.put('/api/v1/resetPassword', (req, res) => {
     let password = req.sanitize(req.body.password)
 
     if ((email != null && email != undefined) && (code != null && code != undefined)) {
-        let sQuerySelect = 'select resetCode from usuario where lactivo = 1 and email = "' + email +' "';
+        let sQuerySelect = 'select resetCode from usuario where lactivo = 1 and email = ?';
         dbConn.query(
-            sQuerySelect,
+            sQuerySelect, [email],
             function (error, results, fields) {
                 if (error) {
                     throw error;
                 }
                 if (results.length > 0) {
                     let Sha3Pass = crypto.SHA3(512).update(password).digest('hex');
-                    let sQueryUpdate = 'UPDATE usuario SET resetCode="", password="' + Sha3Pass +'" WHERE email="' + email +'" and resetCode = "' + code + '"';
+                    let sQueryUpdate = 'UPDATE usuario SET resetCode="", password= ? WHERE email= ? and resetCode = ?';
                     console.log(sQueryUpdate);
-                    dbConn.query(sQueryUpdate, (err, results, fields) => {
+                    dbConn.query(sQueryUpdate, [Sha3Pass, email, code], (err, results, fields) => {
                         if (results.affectedRows < 1) {
                             return res.status(200).send(
                                 {
@@ -231,8 +229,8 @@ app.get('/api/v1/userVerification', (req, res) => {
     var key = req.sanitize(req.query.key);
 
     if(key != null && key != undefined){
-        sQueryUpdate = 'UPDATE usuario SET lactivo=1, activationCode="" WHERE activationCode="' + key +'"';
-        dbConn.query(sQueryUpdate, (err, results, fields) => {
+        sQueryUpdate = 'UPDATE usuario SET lactivo=1, activationCode="" WHERE activationCode= ?';
+        dbConn.query(sQueryUpdate, [key], (err, results, fields) => {
             if (results.affectedRows < 1) {
                 logger.info('/verification (GET) Se ingresó un código inválido para activar una cuenta.');
                 return res.status(200).send(
@@ -326,7 +324,8 @@ app.post('/api/v1/logIn', (req, res) => {
                                 lError: false,
                                 cError: "",
                                 cToken: token,
-                                username: results[0].username
+                                username: results[0].username,
+                                id: results[0].iid
                             });
                         }//fin:if
                         else{
@@ -644,9 +643,7 @@ app.post('/api/v1/comment', (req, res) => {
                               pubId: pubId,
                               userId: userId,
                               author: username,
-                              comment: comment,
-                              isEdited: 0,
-                              isDeleted: 0
+                              comment: comment
                             },
                             lError: false,
                             cToken: ""
@@ -659,120 +656,19 @@ app.post('/api/v1/comment', (req, res) => {
     }
 });
 
-app.put('/api/v1/comment/:id', (req, res) => {
-  let comment = req.body.comment;
-  let cToken = req.headers.token;
-  if(cToken != null && cToken != undefined || true){
-      if (tokenIsActive(cToken) || true) {
-        let sQueryUpdate = 'UPDATE seguridad.comments SET comment = "'+ comment +'", isEdited = 1 WHERE id = '+ req.params.id +";"
-        dbConn.query(sQueryUpdate, (err, results, fields) => {
-
-          let sQuerySelect = "SELECT * FROM seguridad.comments where id = "+ req.params.id +";"
-          dbConn.query(sQuerySelect, (err, results, fields) => {
-            let response = [];
-            for (var result in results) {
-              let comment = {
-                id: results[result].id,
-                userId: results[result].userId,
-                author: results[result].author,
-                comment: results[result].comment,
-                isEdited: results[result].isEdited,
-                isDeleted: results[result].isDeleted
-              }
-              response.push(comment);
-            }
-            return res.json(
-                {
-                    data: response,
-                    lError: false,
-                    cToken:""
-                }
-            );
-          });
-        });
-      }
-    }
-});
-
-app.delete('/api/v1/comment/:id', (req, res) => {
-  let comment = req.body.comment;
-  let cToken = req.headers.token;
-  if(cToken != null && cToken != undefined || true){
-      if (tokenIsActive(cToken) || true) {
-        let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = '+ req.params.id +";"
-        dbConn.query(sQueryUpdate, (err, results, fields) => {
-          let sQuerySelect = "SELECT * FROM seguridad.comments where id = "+ req.params.id +";"
-          dbConn.query(sQuerySelect, (err, results, fields) => {
-            let response = [];
-            for (var result in results) {
-              let comment = {
-                id: results[result].id,
-                userId: results[result].userId,
-                author: results[result].author,
-                comment: results[result].comment,
-                isEdited: results[result].isEdited,
-                isDeleted: results[result].isDeleted
-              }
-              response.push(comment);
-            }
-            return res.json(
-                {
-                    data: response,
-                    lError: false,
-                    cToken:""
-                }
-            );
-          });
-        });
-      }
-    }
-});
-
 app.get('/api/v1/comment/:id', (req, res) => {
   let cToken = req.headers.token;
   if(cToken != null && cToken != undefined || true){
       if (tokenIsActive(cToken) || true) {
-        let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = "+ req.params.id +";"
-        dbConn.query(sQuerySelect, (err, results, fields) => {
+        let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = ?";
+        dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
           let response = [];
           for (var result in results) {
             let comment = {
               id: results[result].id,
               userId: results[result].userId,
               author: results[result].author,
-              comment: results[result].comment,
-              isEdited: results[result].isEdited,
-              isDeleted: results[result].isDeleted
-            }
-            response.push(comment);
-          }
-          return res.json(
-              {
-                  data: response,
-                  lError: false,
-                  cToken:""
-              }
-          );
-        });
-      }
-    }
-});
-
-app.get('/api/v1/publication/:id', (req, res) => {
-  let cToken = req.headers.token;
-  if(cToken != null && cToken != undefined || true){
-      if (tokenIsActive(cToken) || true) {
-        let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = "+ req.params.id +";"
-        dbConn.query(sQuerySelect, (err, results, fields) => {
-          let response = [];
-          for (var result in results) {
-            let comment = {
-              id: results[result].id,
-              url: results[result].ulr,
-              source: results[result].source,
-              name: results[result].name,
-              img: results[result].img,
-              description: results[result].description
+              comment: results[result].comment
             }
             response.push(comment);
           }
@@ -909,9 +805,9 @@ var sleep = (ms) => {
 
 var generateResultado = (source, title, url, image, description) => {
     if (url != null && url != undefined && url != "") {
-        let sQuerySelect = "select name from publicacion where url = '" + url +"'";
+        let sQuerySelect = "select name from publicacion where url = ?";
         dbConn.query(
-            sQuerySelect,
+            sQuerySelect, [url],
             function (error, results, fields) {
                 if (results.length == 0) {
                     let sQueryInsert = 'INSERT INTO publicacion (url, source, name, img, description)';
@@ -943,9 +839,9 @@ app.get('/api/v1/publications', (req, res) => {
     let resultados = [];
     let source = req.sanitize(req.query.source);
     if (source != undefined && source != null) {
-        var sQuerySelect = "select * from publicacion where source = '" + source +"' ORDER BY id desc Limit 100";
+        var sQuerySelect = "select * from publicacion where source = ? ORDER BY id desc Limit 100";
         dbConn.query(
-            sQuerySelect,
+            sQuerySelect, [source],
             function (error, results, fields) {
                 if(error){
                     logger.error(error.message);
@@ -1002,12 +898,18 @@ app.get('/api/v1/publications', (req, res) => {
 
 //-----------------------------------------------------------------------------
 
+app.use(function(req, res){
+    res.send(404);
+});
+
+//-----------------------------------------------------------------------------
+
 app.listen(
     port,
     () => {
         console.log(`Server listening in port ${port}!`);
         logger.info(`Server listening in port ${port}!`);
-         crawlServices();
+        // crawlServices();
         // cron.schedule('* * */4 * *', () => {
         //     crawlServices();
         // });

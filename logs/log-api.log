@@ -286,3 +286,5 @@
 [2021-01-31T01:06:59.880Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
 [2021-01-31T01:07:38.660Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
 [2021-01-31T01:30:45.239Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-31T01:43:10.134Z] info Server listening in port 3000!
+[2021-01-31T01:44:22.760Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
