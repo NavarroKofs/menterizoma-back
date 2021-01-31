@@ -33,13 +33,14 @@ dbConn.connect();
 //-----------------------------------------------------------------------------
 
 /**
-* Returns a status 201 and an array indicating that an email was sent and an indicator that no error occurred. 
-* When an error ocurrs, return lError true and the respective status and description.
+* Returns a status 201 and an array indicating that an email was sent and an indicator that no error occurred.
+* When an error ocurrs, return lError true and the respective status code and description.
+* This route allows creating a user route.
 *
-* @param  email  an absolute URL giving the base location of the image
-* @param  password  an absolute URL giving the base location of the image
-* @param  username the location of the image, relative to the url argument
-* @return      the image at the specified URL
+* @param  email  the email with which the user is going to register
+* @param  password  the password with which the user is going to register
+* @param  username the username with which the user will register
+* @return  returns code 201 if everything was successful or an error code and its description if something went wrong
 */
 app.post('/api/v1/signIn', (req, res) => {
     let email = req.sanitize(req.body.email);
@@ -117,8 +118,14 @@ app.post('/api/v1/signIn', (req, res) => {
     }
 });
 
-//-----------------------------------------------------------------------------
-
+/**
+* Returns a status 200 and an array indicating that an email was sent and an indicator that no error occurred.
+* When an error ocurrs, return lError true and the respective status code and description.
+* This route sends an email with the reset code.
+*
+* @param  email  the email with which the user is registered in the app
+* @return  returns code 200 if everything was successful or an error code and its description if something went wrong
+*/
 app.post('/api/v1/resetPassword', (req, res) => {
     let email = req.sanitize(req.body.email);
 
@@ -170,8 +177,16 @@ app.post('/api/v1/resetPassword', (req, res) => {
     }
 });
 
-//-----------------------------------------------------------------------------
-
+/**
+* Returns a 200 status and an array indicating that the password has been updated and an indicator that no error occurred.
+* When an error ocurrs, return lError true and the respective status code and description.
+* This path allows changing the password of a user account .
+*
+* @param  email  the email with which the user is registered in the app
+* @param  code  the code that was previously sent by email to reset the password
+* @param  password  the new password
+* @return  returns code 200 if everything was successful (and you can log in with your new credentials) or an error code and its description if something went wrong
+*/
 app.put('/api/v1/resetPassword', (req, res) => {
     let email = req.sanitize(req.body.email);
     let code = req.sanitize(req.body.code);
@@ -230,9 +245,14 @@ app.put('/api/v1/resetPassword', (req, res) => {
     }
 });
 
-//-----------------------------------------------------------------------------
-
-//Verificar usuario
+/**
+* Returns a 200 status and an array indicating that the account is active and an indicator that no error occurred.
+* When an error ocurrs, return lError true and the respective status code and description.
+* This path allows activating the previously created user account.
+*
+* @param  key  the key that was emailed
+* @return  returns code 200 if everything was successful or an error code and its description if something went wrong
+*/
 app.get('/api/v1/userVerification', (req, res) => {
     var key = req.sanitize(req.query.key);
 
@@ -272,12 +292,18 @@ app.get('/api/v1/userVerification', (req, res) => {
 
 });
 
-//-----------------------------------------------------------------------------
-
-//Generacion del Token JWT - Inciar sesión
+/**
+* Returns a 201 status and an indicator that no error occurred.
+* When an error ocurrs, return lError true and the respective status code and description.
+* This path allows the user to log in as long as the credentials are correct.
+*
+* @param  email  the email of the user registered in the app
+* @param  password  the password of the user registered in the app
+* @return  returns code 201 if everything was successful or an error code and its description if something went wrong
+*/
 app.post('/api/v1/logIn', (req, res) => {
 
-    var username = req.sanitize(req.body.email);
+    var email = req.sanitize(req.body.email);
     var password = req.sanitize(req.body.password);
 
     var sQuerySelect = "select iid, email, password, username from usuario where lactivo = 1 ";
@@ -290,10 +316,10 @@ app.post('/api/v1/logIn', (req, res) => {
 
     res.setHeader('Content-Type', 'application/json');
 
-    if((username != null && username != undefined) && (password != null && password != undefined)){
-        sQuerySelect += " and email = '" + username + "'";
+    if((email != null && email != undefined) && (password != null && password != undefined)){
+        sQuerySelect += " and email = ?";
         dbConn.query(
-            sQuerySelect,
+            sQuerySelect, [email],
             function (error, results, fields) {
                 if(error){
                     logger.info('/logIn (POST) ' + error.message);
@@ -543,8 +569,6 @@ app.post('/api/demo', (req, res) => {
     }//fin:else
 });//fin:get
 
-//-----------------------------------------------------------------------------
-
 function getInformacionUsuario(_usuario){
 
     return new Promise(function(resolve, reject) {
@@ -576,7 +600,15 @@ function getInformacionUsuario(_usuario){
 
 //-----------------------------------------------------------------------------
 
-// async..await is not allowed in global scope, must use a wrapper
+/**
+* Allows you to send an email to a user account.
+*
+* @param  email  the email of the user registered in the app
+* @param  url  the url that will help us execute the verification code
+* @param  description  the description that we want to send in the email
+* @param  subject  the subject that we will insert in the email
+* @return  returns code 200 if everything was successful.
+*/
 async function sendEmail(email, url, description, subject) {
     let html = "";
     if (subject == 'Verification Code') {
@@ -624,8 +656,17 @@ async function sendEmail(email, url, description, subject) {
     logger.info("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
 
-//-----------------------------------------------------------------------------
 
+/**
+* Allows the user to create a new comment entry inside an especific publication
+*
+* @param  pubId  id of the publication where the comment is found.
+* @param  userId  id of the user that created the comment.
+* @param  comment  string with the comment created.
+* @param  usuario  name of the author of the comment.
+* @param  cToken  token of the logged user.
+* @return  returns code 200 and the information of the insert in the database.
+*/
 app.post('/api/v1/comment', (req, res) => {
     let pubId = req.body.pubId;
     let userId = req.body.userId;
@@ -661,12 +702,34 @@ app.post('/api/v1/comment', (req, res) => {
                     );
                 }
             });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
     }
 });
 
-//-----------------------------------------------------------------------------
-
+/**
+* Allows the user to edit an already created comment entry inside an especific publication
+*
+* @param  id  id of the comment to edit.
+* @param  comment  string with the comment edited.
+* @param  cToken  token of the logged user.
+* @return  returns code 200 and the information of the insert in the database.
+*/
 app.put('/api/v1/comment/:id', (req, res) => {
     let comment = req.body.comment;
     let cToken = req.headers.token;
@@ -674,13 +737,14 @@ app.put('/api/v1/comment/:id', (req, res) => {
         if (tokenIsActive(cToken) || true) {
           let sQueryUpdate = 'UPDATE seguridad.comments SET comment = ? , isEdited = 1 WHERE id = ?;';
           dbConn.query(sQueryUpdate, [comment, req.params.id], (err, results, fields) => {
-  
+
             let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
             dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
               let response = [];
               for (var result in results) {
                 let comment = {
                   id: results[result].id,
+                  pubId: results[result].pubId,
                   userId: results[result].userId,
                   author: results[result].author,
                   comment: results[result].comment,
@@ -689,7 +753,7 @@ app.put('/api/v1/comment/:id', (req, res) => {
                 }
                 response.push(comment);
               }
-              return res.json(
+              return res.status(200).send(
                   {
                       data: response,
                       lError: false,
@@ -698,14 +762,34 @@ app.put('/api/v1/comment/:id', (req, res) => {
               );
             });
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
+      } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
       }
   });
 
-//-----------------------------------------------------------------------------
-
+  /**
+  * Allows the user to delete an already created comment entry inside an especific publication
+  *
+  * @param  id  id of the comment to delete.
+  * @param  cToken  token of the logged user.
+  * @return  returns code 204 and the information of the elimination in the database.
+  */
 app.delete('/api/v1/comment/:id', (req, res) => {
-    let comment = req.body.comment;
     let cToken = req.headers.token;
     if(cToken != null && cToken != undefined || true){
         if (tokenIsActive(cToken) || true) {
@@ -725,7 +809,7 @@ app.delete('/api/v1/comment/:id', (req, res) => {
                 }
                 response.push(comment);
               }
-              return res.json(
+              return res.status(204).send(
                   {
                       data: response,
                       lError: false,
@@ -734,12 +818,33 @@ app.delete('/api/v1/comment/:id', (req, res) => {
               );
             });
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
-      }
-  });
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
+});
 
-//-----------------------------------------------------------------------------
-
+  /**
+  * Allows the user to get every already created comment entry inside an especific publication
+  *
+  * @param  id  id of the publication which comments will be fetched.
+  * @param  cToken  token of the logged user.
+  * @return  returns code 200 and an array with the information of every comment in the publication.
+  */
 app.get('/api/v1/comment/:id', (req, res) => {
     let cToken = req.headers.token;
     if(cToken != null && cToken != undefined || true){
@@ -758,7 +863,7 @@ app.get('/api/v1/comment/:id', (req, res) => {
               }
               response.push(comment);
             }
-            return res.json(
+            return res.status(200).send(
                 {
                     data: response,
                     lError: false,
@@ -766,12 +871,31 @@ app.get('/api/v1/comment/:id', (req, res) => {
                 }
             );
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
     }
 });
 
-//-----------------------------------------------------------------------------
-
+/**
+* It allows to obtain the publications found in the previously
+* defined links and stores them in the database
+*
+*/
 function crawlServices() {
     const urlImgNotFound = "https://uploads-ssl.webflow.com/5d6ed3ec5fd0246da423f7a8/5dcc3ae6e62de1121a4aab86_no-disponible-7448e295ce0d80db8b02f2e8e09c6148ecbd626418792e792d0195e8c26851b9.png";
     const urlImgNotFoundAnmo = "https://www.anmosugoi.com/wp-content/uploads/2019/10/sugoi-perfil-octubre.jpg";
@@ -879,8 +1003,12 @@ function crawlServices() {
     }
 }
 
-//-----------------------------------------------------------------------------
-
+/**
+* Generates time where the application "does nothing" so as not to saturate the API that is consumed
+*
+* @param  ms  time in milliseconds
+* @return  returns a promise that emulates the time the application "sleeps".
+*/
 var sleep = (ms) => {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
@@ -1003,23 +1131,41 @@ app.get('/api/v1/publication/:id', (req, res) => {
                 }
             );
           });
+        } else {
+            return res.status(200).send(
+                {
+                    lError: true,
+                    cError: "Invalid token",
+                    cToken: ""
+                }
+            );
         }
-      }
+    } else {
+        return res.status(422).send(
+            {
+                lError: true,
+                cError: "Unprocessable Entity",
+                cToken: ""
+            }
+        );
+    }
   });
 
 //-----------------------------------------------------------------------------
 
-//QR CODE
-//https://chart.googleapis.com/chart?cht=qr&chl=https://www.qrcode-monkey.com/qr-code-api-with-logo&chs=200x200
-
-//-----------------------------------------------------------------------------
-
+/**
+* Returns 404 if an undefined path is entered or that does not use the correct method
+*
+* @return  Returns 404 if an undefined path is entered or that does not use the correct method .
+*/
 app.use(function(req, res){
     res.send(404);
 });
 
-//-----------------------------------------------------------------------------
-
+/**
+* Start the application and make the cron job available
+*
+*/
 app.listen(
     port,
     () => {
