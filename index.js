@@ -32,7 +32,15 @@ dbConn.connect();
 
 //-----------------------------------------------------------------------------
 
-//Registro
+/**
+* Returns a status 201 and an array indicating that an email was sent and an indicator that no error occurred. 
+* When an error ocurrs, return lError true and the respective status and description.
+*
+* @param  email  an absolute URL giving the base location of the image
+* @param  password  an absolute URL giving the base location of the image
+* @param  username the location of the image, relative to the url argument
+* @return      the image at the specified URL
+*/
 app.post('/api/v1/signIn', (req, res) => {
     let email = req.sanitize(req.body.email);
     let password = req.sanitize(req.body.password);
@@ -643,7 +651,9 @@ app.post('/api/v1/comment', (req, res) => {
                               pubId: pubId,
                               userId: userId,
                               author: username,
-                              comment: comment
+                              comment: comment,
+                              isEdited: 0,
+                              isDeleted: 0
                             },
                             lError: false,
                             cToken: ""
@@ -651,40 +661,114 @@ app.post('/api/v1/comment', (req, res) => {
                     );
                 }
             });
-
         }
     }
 });
 
-app.get('/api/v1/comment/:id', (req, res) => {
-  let cToken = req.headers.token;
-  if(cToken != null && cToken != undefined || true){
-      if (tokenIsActive(cToken) || true) {
-        let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = ?";
-        dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
-          let response = [];
-          for (var result in results) {
-            let comment = {
-              id: results[result].id,
-              userId: results[result].userId,
-              author: results[result].author,
-              comment: results[result].comment
-            }
-            response.push(comment);
-          }
-          return res.json(
-              {
-                  data: response,
-                  lError: false,
-                  cToken:""
+//-----------------------------------------------------------------------------
+
+app.put('/api/v1/comment/:id', (req, res) => {
+    let comment = req.body.comment;
+    let cToken = req.headers.token;
+    if(cToken != null && cToken != undefined || true){
+        if (tokenIsActive(cToken) || true) {
+          let sQueryUpdate = 'UPDATE seguridad.comments SET comment = ? , isEdited = 1 WHERE id = ?;';
+          dbConn.query(sQueryUpdate, [comment, req.params.id], (err, results, fields) => {
+  
+            let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
+            dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+              let response = [];
+              for (var result in results) {
+                let comment = {
+                  id: results[result].id,
+                  userId: results[result].userId,
+                  author: results[result].author,
+                  comment: results[result].comment,
+                  isEdited: results[result].isEdited,
+                  isDeleted: results[result].isDeleted
+                }
+                response.push(comment);
               }
-          );
-        });
+              return res.json(
+                  {
+                      data: response,
+                      lError: false,
+                      cToken:""
+                  }
+              );
+            });
+          });
+        }
       }
+  });
+
+//-----------------------------------------------------------------------------
+
+app.delete('/api/v1/comment/:id', (req, res) => {
+    let comment = req.body.comment;
+    let cToken = req.headers.token;
+    if(cToken != null && cToken != undefined || true){
+        if (tokenIsActive(cToken) || true) {
+          let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = ? ;';
+          dbConn.query(sQueryUpdate, [req.params.id], (err, results, fields) => {
+            let sQuerySelect = "SELECT * FROM seguridad.comments where id = ?;"
+            dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+              let response = [];
+              for (var result in results) {
+                let comment = {
+                  id: results[result].id,
+                  userId: results[result].userId,
+                  author: results[result].author,
+                  comment: results[result].comment,
+                  isEdited: results[result].isEdited,
+                  isDeleted: results[result].isDeleted
+                }
+                response.push(comment);
+              }
+              return res.json(
+                  {
+                      data: response,
+                      lError: false,
+                      cToken:""
+                  }
+              );
+            });
+          });
+        }
+      }
+  });
+
+//-----------------------------------------------------------------------------
+
+app.get('/api/v1/comment/:id', (req, res) => {
+    let cToken = req.headers.token;
+    if(cToken != null && cToken != undefined || true){
+        if (tokenIsActive(cToken) || true) {
+          let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = ? ;"
+          dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+            let response = [];
+            for (var result in results) {
+              let comment = {
+                id: results[result].id,
+                userId: results[result].userId,
+                author: results[result].author,
+                comment: results[result].comment,
+                isEdited: results[result].isEdited,
+                isDeleted: results[result].isDeleted
+              }
+              response.push(comment);
+            }
+            return res.json(
+                {
+                    data: response,
+                    lError: false,
+                    cToken:""
+                }
+            );
+          });
+        }
     }
 });
-
-
 
 //-----------------------------------------------------------------------------
 
@@ -890,6 +974,38 @@ app.get('/api/v1/publications', (req, res) => {
         );
     }
 });
+
+//-----------------------------------------------------------------------------
+
+app.get('/api/v1/publication/:id', (req, res) => {
+    let cToken = req.headers.token;
+    if(cToken != null && cToken != undefined || true){
+        if (tokenIsActive(cToken) || true) {
+          let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = ? ;"
+          dbConn.query(sQuerySelect, [req.params.id], (err, results, fields) => {
+            let response = [];
+            for (var result in results) {
+              let comment = {
+                id: results[result].id,
+                url: results[result].ulr,
+                source: results[result].source,
+                name: results[result].name,
+                img: results[result].img,
+                description: results[result].description
+              }
+              response.push(comment);
+            }
+            return res.json(
+                {
+                    data: response,
+                    lError: false,
+                    cToken:""
+                }
+            );
+          });
+        }
+      }
+  });
 
 //-----------------------------------------------------------------------------
 
