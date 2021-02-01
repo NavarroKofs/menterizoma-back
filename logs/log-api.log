@@ -370,3 +370,16 @@
 [2021-01-31T23:26:43.572Z] info Server listening in port 3000!
 [2021-01-31T23:26:45.201Z] info /generateResultado se añadieron publicaciones a la base de datos.
 [2021-01-31T23:26:45.904Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T23:29:55.756Z] info Server listening in port 3000!
+[2021-01-31T23:30:16.543Z] info /api/v1/comment (POST)
+[2021-01-31T23:36:20.225Z] info Server listening in port 3000!
+[2021-01-31T23:36:22.109Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T23:36:22.271Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T23:36:22.295Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T23:36:22.299Z] info /generateResultado se añadieron publicaciones a la base de datos.
+[2021-01-31T23:36:37.274Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-01-31T23:50:19.123Z] info /api/v1/comment (POST)
+[2021-02-01T00:09:16.695Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-02-01T00:10:13.756Z] info /logIn (POST) Se generó el token para (poner aquí la dirección IP).
+[2021-02-01T00:10:40.944Z] info /api/v1/comment (POST)
+[2021-02-01T00:12:01.794Z] info /api/v1/comment (POST)
