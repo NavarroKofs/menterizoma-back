@@ -9,8 +9,6 @@ const logger     = require('./utils/logger');
 const axios      = require('axios');
 const cron = require('node-cron');
 const expressSanitizer = require('express-sanitizer');
-const { error } = require('winston');
-const { use } = require('chai');
 
 const port = 3000;
 
@@ -439,6 +437,7 @@ app.delete('/logOut', (req, res) => {
 protectedRoute.use((req, res, next) => {
 
     const sToken = req.sanitize(req.headers['token']);
+    const email = req.sanitize(req.body['email']);
 
     if (sToken) {
         jwt.verify(sToken, app.get('secret_key'), (err, decoded) => {
@@ -452,6 +451,36 @@ protectedRoute.use((req, res, next) => {
             }
             else {
                 req.decoded = decoded;
+                
+                let sQueryUpdate = 'UPDATE tokens_jwt SET ctoken = ? , dtfecha_expira = ? WHERE ctoken = ?;';
+
+                let tokenData = {
+                    usuario: email
+                }
+                
+            
+                let dtExpire = new Date();
+                dtExpire.setSeconds(dtExpire.getSeconds() + config.EXPIRE_TOKEN);
+                dtExpireToken = config.EXPIRE_TOKEN;
+                var token = jwt.sign(tokenData, config.CLAVE_SECRETA ,
+                    {
+                        expiresIn:dtExpireToken
+                    }
+                );
+            
+                let aDataInsert = [token, dtExpire, sToken];
+            
+                dbConn.query(sQueryUpdate, aDataInsert, (err, results, fields) => {
+                    if (err) {
+                        logger.info(err.message);
+                        throw err;
+                    }
+                    if (results.length == 1) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
                 next();
             }
         });
@@ -559,22 +588,30 @@ app.post('/api/v1/comment', protectedRoute, (req, res) => {
             throw err;
         } else {
             logger.info("/api/v1/comment (POST)");
-            return res.status(200).send(
-                {
-                  data:
-                    {
-                      id: results.insertId,
-                      pubId: pubId,
-                      userId: userId,
-                      author: username,
-                      comment: comment,
-                      isEdited: 0,
-                      isDeleted: 0
-                    },
-                    lError: false,
-                    cToken: ""
+            let sQuerySelect = 'SELECT ctoken from tokens_jwt where iid_usuario = ?';
+
+            let aDataSelect = [userId];
+            dbConn.query(sQuerySelect, aDataSelect, (err, results, fields) => {
+                if (err) {
+                    throw err;
                 }
-            );
+                return res.status(200).send(
+                    {
+                      data:
+                        {
+                          id: results.insertId,
+                          pubId: pubId,
+                          userId: userId,
+                          author: username,
+                          comment: comment,
+                          isEdited: 0,
+                          isDeleted: 0
+                        },
+                        lError: false,
+                        cToken: results[0].ctoken
+                    }
+                );
+            });
         }
     });
 });
@@ -582,25 +619,17 @@ app.post('/api/v1/comment', protectedRoute, (req, res) => {
 /**
 * Allows the user to edit an already created comment entry inside an especific publication
 *
-* @param  id  id of the comment to edit.
+* @param  id  id of the user that edit.
+* @param  userId  id of the comment to edit.
 * @param  comment  string with the comment edited.
 * @param  token  token of the logged user.
 * @return  returns code 200 and the information of the insert in the database.
 */
 app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
+    let userId = req.sanitize(req.body.userId);
     let comment = req.sanitize(req.body.comment);
     let id = req.sanitize(req.params.id);
-    if (id == null || id == undefined) {
-        return res.status(422).send(
-            {
-                lError: true,
-                cError: "Unprocessable Entity",
-                cToken: ""
-            }
-        );
-    }
-
-    if (comment == null || comment == undefined) {
+    if ((id == null || id == undefined) || (userId == null || userId == undefined) || (comment == null || comment == undefined)) {
         return res.status(422).send(
             {
                 lError: true,
@@ -628,13 +657,21 @@ app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
           }
           response.push(comment);
         }
-        return res.status(200).send(
-            {
-                data: response,
-                lError: false,
-                cToken:""
+        let sQuerySelect = 'SELECT ctoken from tokens_jwt where iid_usuario = ?';
+
+        let aDataSelect = [userId];
+        dbConn.query(sQuerySelect, aDataSelect, (err, results, fields) => {
+            if (err) {
+                throw err;
             }
-        );
+            return res.status(200).send(
+                {
+                    data: response,
+                    lError: false,
+                    cToken: results[0].ctoken
+                }
+            );
+        });
       });
     });
   });
@@ -647,8 +684,9 @@ app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
   * @return  returns code 204 and the information of the elimination in the database.
   */
 app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
+    let userId = req.sanitize(req.body.userId);
     let id = req.sanitize(req.params.id);
-    if (id == null || id == undefined) {
+    if ((id == null || id == undefined) || (userId == null || userId == undefined)) {
         return res.status(422).send(
             {
                 lError: true,
@@ -673,13 +711,21 @@ app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
           }
           response.push(comment);
         }
-        return res.status(204).send(
-            {
-                data: response,
-                lError: false,
-                cToken:""
+        let sQuerySelect = 'SELECT ctoken from tokens_jwt where iid_usuario = ?';
+
+        let aDataSelect = [userId];
+        dbConn.query(sQuerySelect, aDataSelect, (err, results, fields) => {
+            if (err) {
+                throw err;
             }
-        );
+            return res.status(204).send(
+                {
+                    data: response,
+                    lError: false,
+                    cToken: results[0].ctoken
+                }
+            );
+        });
       });
     });
 });
@@ -716,12 +762,11 @@ app.get('/api/v1/comment/:id', (req, res) => {
         response.push(comment);
       }
       return res.status(200).send(
-          {
-              data: response,
-              lError: false,
-              cToken:""
-          }
-      );
+        {
+            data: response,
+            lError: false,
+            cToken: ""
+        });
     });
 });
 
