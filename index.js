@@ -132,6 +132,7 @@ app.post('/api/v1/resetPassword', (req, res) => {
             sQuerySelect, [email],
             function (error, results, fields) {
                 if (error) {
+                    logger.error(error.message);
                     throw error;
                 }
                 if (results.length > 0) {
@@ -141,9 +142,11 @@ app.post('/api/v1/resetPassword', (req, res) => {
                     console.log(sQueryUpdate);
                     dbConn.query(sQueryUpdate, [Sha3Code, email], (err, results, fields) => {
                         if (err) {
+                            logger.error(error.message);
                             throw err;
                         }
                         sendEmail(email, "", 'This is your reset password code: ' + Sha3Code, "Reset Password");
+                        logger.info("/resetPassword (POST) Se le ha mandado un correo electrónico con el código a " + email);
                         return res.status(200).send(
                             {
                                 lError: false,
@@ -153,6 +156,7 @@ app.post('/api/v1/resetPassword', (req, res) => {
                         );
                     });
                 } else {
+                    logger.info("/resetPassword (POST) El email  " + email + " no se encontró.");
                     return res.status(404).send(
                         {
                             lError: true,
@@ -164,6 +168,7 @@ app.post('/api/v1/resetPassword', (req, res) => {
             }
         );
     } else {
+        logger.info("/resetPassword (POST) Unprocessable Entity ");
         return res.status(422).send(
             {
                 lError: true,
@@ -195,6 +200,7 @@ app.put('/api/v1/resetPassword', (req, res) => {
             sQuerySelect, [email],
             function (error, results, fields) {
                 if (error) {
+                    logger.error(error.message);
                     throw error;
                 }
                 if (results.length > 0) {
@@ -203,6 +209,7 @@ app.put('/api/v1/resetPassword', (req, res) => {
                     console.log(sQueryUpdate);
                     dbConn.query(sQueryUpdate, [Sha3Pass, email, code], (err, results, fields) => {
                         if (results.affectedRows < 1) {
+                            logger.info("/resetPassword (PUT) Se introdujo un código inválido ");
                             return res.status(200).send(
                                 {
                                     lError: true,
@@ -211,6 +218,7 @@ app.put('/api/v1/resetPassword', (req, res) => {
                                 }
                             );
                         } else {
+                            logger.info("/resetPassword (PUT) Se cambió la contraseña de " + email);
                             return res.status(200).send(
                                 {
                                     lError: true,
@@ -221,6 +229,7 @@ app.put('/api/v1/resetPassword', (req, res) => {
                         }
                     });
                 } else {
+                    logger.info("/resetPassword (PUT) No se encontró el email " + email);
                     return res.status(404).send(
                         {
                             lError: true,
@@ -232,6 +241,7 @@ app.put('/api/v1/resetPassword', (req, res) => {
             }
         );
     } else {
+        logger.info("/resetPassword (PUT) Unprocessable Entity ");
         return res.status(422).send(
             {
                 lError: true,
@@ -257,7 +267,7 @@ app.get('/api/v1/userVerification', (req, res) => {
         sQueryUpdate = 'UPDATE usuario SET lactivo=1, activationCode="" WHERE activationCode= ?';
         dbConn.query(sQueryUpdate, [key], (err, results, fields) => {
             if (results.affectedRows < 1) {
-                logger.info('/verification (GET) Se ingresó un código inválido para activar una cuenta.');
+                logger.info('/userVerification (GET) Se ingresó un código inválido para activar una cuenta.');
                 return res.status(200).send(
                     {
                         lError: true,
@@ -266,7 +276,7 @@ app.get('/api/v1/userVerification', (req, res) => {
                     }
                 );
             } else {
-                logger.info('/verification (GET) Se ingresó el código' + key +' para activar una cuenta.');
+                logger.info('/userVerification (GET) Se ingresó el código' + key +' para activar una cuenta.');
                 return res.status(200).send(
                     {
                         lError: true,
@@ -277,7 +287,7 @@ app.get('/api/v1/userVerification', (req, res) => {
             }
         });
     } else {
-        logger.info('/verification (GET) Se intentó acceder en la ruta sin ingresar el parámetro key');
+        logger.info('/userVerification (GET) Se intentó acceder en la ruta sin ingresar el parámetro key');
         return res.status(422).send(
             {
                 lError: true,
@@ -475,17 +485,13 @@ protectedRoute.use((req, res, next) => {
                         logger.info(err.message);
                         throw err;
                     }
-                    if (results.length == 1) {
-                        return true;
-                    } else {
-                        return false;
-                    }
                 });
                 next();
             }
         });
     } //fin:if
     else {
+        logger.info("El token no fue enviado en la cabecera de la petición");
         res.status(400).send(
             {
                 lError: true,
@@ -569,6 +575,7 @@ app.post('/api/v1/comment', protectedRoute, (req, res) => {
 
     if ((pubId == null || pubId == undefined) || (userId == null || userId == undefined) ||
     (comment == null || comment == undefined) || (username == null || username == undefined)) {
+        logger.info("/comment (POST) Unprocessable Entity");
         return res.status(422).send(
             {
                 lError: true,
@@ -587,12 +594,12 @@ app.post('/api/v1/comment', protectedRoute, (req, res) => {
             logger.info(err.message);
             throw err;
         } else {
-            logger.info("/api/v1/comment (POST)");
             let sQuerySelect = 'SELECT ctoken from tokens_jwt where iid_usuario = ?';
 
             let aDataSelect = [userId];
             dbConn.query(sQuerySelect, aDataSelect, (err, results, fields) => {
                 if (err) {
+                    logger.error(err.message);
                     throw err;
                 }
                 return res.status(200).send(
@@ -630,6 +637,7 @@ app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
     let comment = req.sanitize(req.body.comment);
     let id = req.sanitize(req.params.id);
     if ((id == null || id == undefined) || (userId == null || userId == undefined) || (comment == null || comment == undefined)) {
+        logger.info("/comment/:id (PUT) Unprocessable Entity");
         return res.status(422).send(
             {
                 lError: true,
@@ -641,27 +649,31 @@ app.put('/api/v1/comment/:id', protectedRoute, (req, res) => {
 
     let sQueryUpdate = 'UPDATE seguridad.comments SET comment = ? , isEdited = 1 WHERE id = ?;';
     dbConn.query(sQueryUpdate, [comment, id], (err, results, fields) => {
-
-      let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
-      dbConn.query(sQuerySelect, [id], (err, results, fields) => {
+        if (err) {
+            logger.info(err.message);
+            throw err;
+        }
+        let sQuerySelect = "SELECT * FROM seguridad.comments where id = ? ;";
+        dbConn.query(sQuerySelect, [id], (err, results, fields) => {
         let response = [];
         for (var result in results) {
-          let comment = {
-            id: results[result].id,
-            pubId: results[result].pubId,
-            userId: results[result].userId,
-            author: results[result].author,
-            comment: results[result].comment,
-            isEdited: results[result].isEdited,
-            isDeleted: results[result].isDeleted
-          }
-          response.push(comment);
+            let comment = {
+                id: results[result].id,
+                pubId: results[result].pubId,
+                userId: results[result].userId,
+                author: results[result].author,
+                comment: results[result].comment,
+                isEdited: results[result].isEdited,
+                isDeleted: results[result].isDeleted
+            }
+            response.push(comment);
         }
         let sQuerySelect = 'SELECT ctoken from tokens_jwt where iid_usuario = ?';
 
         let aDataSelect = [userId];
         dbConn.query(sQuerySelect, aDataSelect, (err, results, fields) => {
             if (err) {
+                logger.error(err.message);
                 throw err;
             }
             return res.status(200).send(
@@ -687,6 +699,7 @@ app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
     let userId = req.sanitize(req.body.userId);
     let id = req.sanitize(req.params.id);
     if ((id == null || id == undefined) || (userId == null || userId == undefined)) {
+        logger.info("/comment/:id (DELETE) Unprocessable Entity");
         return res.status(422).send(
             {
                 lError: true,
@@ -697,6 +710,10 @@ app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
     }
     let sQueryUpdate = 'UPDATE seguridad.comments SET isDeleted = 1 WHERE id = ? ;';
     dbConn.query(sQueryUpdate, [id], (err, results, fields) => {
+        if (err) {
+            logger.info(err.message);
+            throw err;
+        }
       let sQuerySelect = "SELECT * FROM seguridad.comments where id = ?;"
       dbConn.query(sQuerySelect, [id], (err, results, fields) => {
         let response = [];
@@ -716,6 +733,7 @@ app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
         let aDataSelect = [userId];
         dbConn.query(sQuerySelect, aDataSelect, (err, results, fields) => {
             if (err) {
+                logger.error(err.message);
                 throw err;
             }
             return res.status(204).send(
@@ -739,6 +757,7 @@ app.delete('/api/v1/comment/:id', protectedRoute, (req, res) => {
 app.get('/api/v1/comment/:id', (req, res) => {
     let id = req.sanitize(req.params.id);
     if (id == null || id == undefined) {
+        logger.info("/comment/:id (GET) Unprocessable Entity");
         return res.status(422).send(
             {
                 lError: true,
@@ -749,6 +768,10 @@ app.get('/api/v1/comment/:id', (req, res) => {
     }
     let sQuerySelect = "SELECT * FROM seguridad.comments where pubId = ? ;"
     dbConn.query(sQuerySelect, [id], (err, results, fields) => {
+        if (err) {
+            logger.info(err.message);
+            throw err;
+        }
       let response = [];
       for (var result in results) {
         let comment = {
@@ -908,6 +931,7 @@ var generateResultado = (source, title, url, image, description) => {
             sQuerySelect, [url],
             function (error, results, fields) {
                 if (error) {
+                    logger.error(error.message);
                     throw error;
                 }
                 if (results.length == 0) {
@@ -1000,6 +1024,7 @@ app.get('/api/v1/publications', (req, res) => {
             }
         );
     } else {
+        logger.info("/publication (GET) Unprocessable Entity");
         return res.status(422).send(
             {
                 lError: true,
@@ -1020,6 +1045,7 @@ app.get('/api/v1/publications', (req, res) => {
 app.get('/api/v1/publication/:id', (req, res) => {
     let id = req.sanitize(req.params.id);
     if (id == null || id == undefined) {
+        logger.info("/publication/:id (GET) Unprocessable Entity");
         return res.status(422).send(
             {
                 lError: true,
@@ -1031,6 +1057,7 @@ app.get('/api/v1/publication/:id', (req, res) => {
     let sQuerySelect = "SELECT * FROM seguridad.publicacion where id = ? ;"
     dbConn.query(sQuerySelect, [id], (err, results, fields) => {
         if (err) {
+            logger.error(err.message);
             throw err;
         }
         let response = [];
@@ -1064,6 +1091,7 @@ app.get('/api/v1/publication/:id', (req, res) => {
 app.get('/api/v1/search', (req, res) => {
     let query = req.sanitize(req.query.query);
     if (query == null || query == undefined) {
+        logger.info("/search (POST) Unprocessable Entity");
         return res.status(422).send(
             {
                 lError: true,
@@ -1090,6 +1118,7 @@ app.get('/api/v1/search', (req, res) => {
         sQuerySelect, palabras,
         function (error, results, fields) {
             if (error) {
+                logger.info(error.message);
                 throw error;
             }
             if (results.length < 1) {
